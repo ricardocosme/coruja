@@ -1,0 +1,6 @@
+bin/
+stage/
+commit
+compile*.sh
+presentation/slides.*
+!presentation/slides.tex

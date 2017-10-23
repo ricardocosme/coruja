@@ -1,0 +1,113 @@
+import os ;
+import testing ;
+
+local boost_root_path = [ os.environ BOOST_ROOT ] ;
+if ! $(boost_root_path)
+{ boost_root_path = "../boost" ; }
+
+use-project boost : $(boost_root_path) ;
+
+local range-v3_path = [ os.environ RANGE-V3 ] ;
+if ! $(range-v3_path)
+{ range-v3_path = "../range-v3" ; }
+
+local gbenchmark_path = [ os.environ GBENCHMARK ] ;
+if ! $(gbenchmark_path)
+{ gbenchmark_path = "../gbenchmark" ; }
+
+project google-benchmark
+  : requirements
+    <include>$(gbenchmark_path)/include
+  ;
+
+lib pthread ;
+
+lib benchmark
+  : pthread
+  : <search>$(gbenchmark_path)/build/src
+  ;
+  
+project coruja
+  : requirements
+    <include>include
+    <include>test
+    <cxxflags>-std=c++11
+    <use>/boost//headers
+    <include>$(range-v3_path)/include
+  : default-build
+    <variant>debug
+    <optimization>speed
+    <warnings>off
+  ;
+
+run test/any_object_view.cpp ;
+run test/object.cpp ;
+run test/lift_object.cpp ;
+run test/transform_object.cpp ;
+run test/signal.cpp ;
+run test/container_view.cpp ;
+run test/transform_vector.cpp ;
+run test/vector.cpp ;
+run test/vector_as_base.cpp ;
+
+run test/boost_serialization_object.cpp
+: : : <library>/boost//serialization <library>/boost//filesystem ;
+run test/boost_serialization_vector.cpp
+: : : <library>/boost//serialization <library>/boost//filesystem ;
+  
+exe fullname_demo
+  : demo/fullname.cpp
+  : <cxxflags>-std=c++14
+  ;
+explicit fullname_demo ;
+
+exe fullnames_demo
+  : demo/fullnames.cpp
+  : <cxxflags>-std=c++14
+  ;
+explicit fullnames_demo ;
+
+exe hello_demo
+  : demo/hello.cpp
+  : <cxxflags>-std=c++14
+  ;
+explicit hello_demo ;
+
+exe bench_signals
+  : test/bench_signals.cpp
+  : <library>/google-benchmark//benchmark
+  ;
+explicit bench_signals ;
+
+exe bench_vec_transform_push_back
+  : test/bench_vec_transform_push_back.cpp
+  : <library>/google-benchmark//benchmark
+  ;
+explicit bench_vec_transform_push_back ;
+
+exe bench_vec_2xtransform
+  : test/bench_vec_2xtransform.cpp
+  : <library>/google-benchmark//benchmark
+  ;
+explicit bench_vec_2xtransform ;
+
+exe bench_lift_assignment
+  : test/bench_lift_assignment.cpp
+  : <library>/google-benchmark//benchmark
+  ;
+explicit bench_lift_assignment ;
+
+install stage/bench
+  : bench_signals
+    bench_vec_transform_push_back
+    bench_vec_2xtransform
+    bench_lift_assignment
+;
+explicit stage/bench ;
+
+install stage/demo
+  : fullname_demo
+    fullnames_demo
+    hello_demo
+;
+explicit stage/demo ;

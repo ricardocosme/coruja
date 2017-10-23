@@ -1,0 +1,50 @@
+* coruja
+"Coruja" means "Owl" in Portuguese. It's an alternative solution to the [[https://en.wikipedia.org/wiki/Observer_pattern][Observer pattern]] using [[https://en.wikipedia.org/wiki/Signals_and_slots][signals&slots]] or a more classic approach using polymorphic types likes ~Subject~ and ~Observer~. It's a *C++11* library with a more high level abstraction over the [[https://en.wikipedia.org/wiki/Observer_pattern][Observer pattern]], avoiding bolierplate code and inversion of control *IoC*. STL containers like ~std::vector~ are adapted to become observables, i.e., observers may be notified when elements are inserted or erased. Actually a /Range/ can be  observable and observers may observe a transformation of a container, for example.
+
+** Observable containers
+#+BEGIN_SRC C++
+coruja::vector<string> v{"John Jones", "Robert Plant"};
+
+v.for_each([](auto& member){ cout << member << endl; });
+
+v.emplace_back("Jimmy Page");
+
+//outputs:
+//John Jones
+//Robert Plant
+//Jimmy Page
+#+END_SRC
+
+** Observable ranges
+#+BEGIN_SRC C++
+struct person_t { std::string first_name, surname; };
+
+vector<person_t> persons;
+
+auto fullnames = transform
+    (persons, [](auto& person){ return person.first_name + person.surname; });
+
+fullnames.for_each([](auto&& fullname){ cout << "hi " << fullname << endl; });
+
+//outputs:
+//hi JohnBonham
+//hi JimmyPage
+#+END_SRC
+
+** Observable objects
+#+BEGIN_SRC C++
+object<string> first_name, surname;
+
+auto fullname = first_name + surname;
+fullname.after_change([](auto&& s){ cout << s << endl; });
+
+first_name = "Jimmy";
+//outputs:
+//Jimmy
+
+surname = "Page";
+//outputs:
+//JimmyPage
+#+END_SRC
+
+This library is distributed under the Boost Software License, Version 1.0.
