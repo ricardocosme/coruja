@@ -24,11 +24,11 @@ vector<person_t> persons;
 auto fullnames = transform
     (persons, [](auto& person){ return person.first_name + person.surname; });
 
-fullnames.for_each([](auto&& fullname){ cout << "hi " << fullname << endl; });
+fullnames.for_each([](auto&& fullname){ cout << fullname << endl; });
 
 //outputs:
-//hi JohnBonham
-//hi JimmyPage
+//JohnBonham
+//JimmyPage
 #+END_SRC
 
 ** Observable objects
