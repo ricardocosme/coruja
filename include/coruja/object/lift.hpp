@@ -13,12 +13,12 @@
 #include "coruja/object/detail/plus.hpp"
 #include "coruja/object/object_view.hpp"
 #include "coruja/support/connections.hpp"
+#include "coruja/support/macro.hpp"
 
 #include <boost/fusion/functional/invocation/invoke.hpp>
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/vector.hpp>
 #include <boost/fusion/include/zip_view.hpp>
-#include <coruja/support/macro.hpp>
 #include <range/v3/utility/semiregular.hpp>
 
 namespace coruja { 
@@ -87,5 +87,4 @@ CORUJA_DECLTYPE_AUTO_RETURN
      detail::lift_to_observable(std::forward<Transform>(transform)))
 )
 
-    
 }

@@ -27,7 +27,7 @@ struct connections
     { boost::fusion::for_each(_conns, detail::disconnect_impl{}); }
     
     bool blocked() const noexcept
-    { boost::fusion::all(_conns, detail::is_blocked{}); }
+    { return boost::fusion::all(_conns, detail::is_blocked{}); }
     
     void block() noexcept
     { boost::fusion::for_each(_conns, detail::block_impl{}); }

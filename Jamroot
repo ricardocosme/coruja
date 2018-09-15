@@ -97,11 +97,18 @@ exe bench_lift_assignment
   ;
 explicit bench_lift_assignment ;
 
+exe bench_object_after_change
+  : test/bench_object_after_change.cpp
+  : <library>/google-benchmark//benchmark
+  ;
+explicit bench_object_after_change ;
+
 install stage/bench
   : bench_signals
     bench_vec_transform_push_back
     bench_vec_2xtransform
     bench_lift_assignment
+    bench_object_after_change
 ;
 explicit stage/bench ;
 

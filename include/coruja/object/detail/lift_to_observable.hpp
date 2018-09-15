@@ -14,16 +14,18 @@
 namespace coruja { namespace detail {
     
 template<typename F>    
-struct lift_to_observable_impl
+struct lift_to_observable_impl : private F
 {
+    lift_to_observable_impl() = default;
+    
+    lift_to_observable_impl(F f) : F(std::move(f)) {}
+    
     template<typename... Objects>
     typename std::result_of<
         F(typename std::remove_reference<Objects>::type::observed_t...)
     >::type
     operator()(Objects&&... objects)
-    { return f(objects.get()...); }
-    
-    F f;
+    { return F::operator()(objects.get()...); }
 };
 
 template<typename F>

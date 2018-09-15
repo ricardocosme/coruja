@@ -12,9 +12,9 @@ namespace coruja { namespace detail {
 
 template<typename Objects, typename Transform, typename F, typename Observed>
 struct lift_f : private Transform {
-    lift_f(Objects& objects, Transform transform, F f)
+    lift_f(Transform transform, Objects objects, F f)
         : Transform(std::move(transform))
-        , _objects(objects)
+        , _objects(std::move(objects))
         , _f(std::move(f))
     {}
     
@@ -41,12 +41,12 @@ struct connect_object
         //TODO: Update from
         conn = object.after_change
             (lift_f<From, Transform, F, typename Obj::observed_t>
-             (_from, _transform, _f));
+             (_transform, _from, _f));
     }
     
     From& _from;
     Transform& _transform;
-    F _f;
+    F& _f;
 };
 
 }}
