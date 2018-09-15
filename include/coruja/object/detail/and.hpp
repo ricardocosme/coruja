@@ -25,12 +25,10 @@ class lift_object;
 
 template<typename O1,
          typename O2,
-         typename Enable = typename std::enable_if<
-             is_observable_object<
-                 typename std::remove_reference<O1>::type>::value
-             && is_observable_object<
-                 typename std::remove_reference<O2>::type>::value
-             >::type>
+         typename Enable = enable_if_t<
+             is_observable_object<O1>::value
+             && is_observable_object<O2>::value
+             >>
 inline auto operator&&(O1&& o1, O2&& o2)
 CORUJA_DECLTYPE_AUTO_RETURN
 ( lift(And{}, std::forward<O1>(o1), std::forward<O2>(o2)) )

@@ -403,20 +403,20 @@ public:
     }
                
     template<typename F>
-    typename std::enable_if<
+    enable_if_t<
         !boost::hof::is_invocable<
             F, reference>::value,
         for_each_connection_t
-    >::type
+    >
     for_each(F&& f)
     { return detail::for_each_by<F, detail::fwd_by_it>(as_derived(), std::forward<F>(f)); }
     
     template<typename F>
-    typename std::enable_if<
+    enable_if_t<
         boost::hof::is_invocable<
             F, reference>::value,
         for_each_connection_t
-    >::type
+    >
     for_each(F&& f)
     { return detail::for_each_by<F, detail::fwd_by_ref>(as_derived(), std::forward<F>(f)); }
 
@@ -424,11 +424,11 @@ public:
     { return _container; }
 
     template<typename F>
-    typename std::enable_if<
+    enable_if_t<
         !boost::hof::is_invocable<
             F, reference>::value,
         before_erase_connection_t
-    >::type
+    >
     before_erase(F&& f)
     {
         return _before_erase.connect
@@ -436,11 +436,11 @@ public:
     }    
     
     template<typename F>
-    typename std::enable_if<
+    enable_if_t<
         boost::hof::is_invocable<
             F, reference>::value,
         before_erase_connection_t
-    >::type
+    >
     before_erase(F&& f)
     {
         return _before_erase.connect
@@ -449,11 +449,11 @@ public:
     
     //Deprecated
     template<typename F>
-    typename std::enable_if<
+    enable_if_t<
         !boost::hof::is_invocable<
             F, reference>::value,
         after_insert_connection_t
-    >::type
+    >
     after_insert(F&& f)
     {
         return _after_insert.connect
@@ -462,11 +462,11 @@ public:
     
     //Deprecated
     template<typename F>
-    typename std::enable_if<
+    enable_if_t<
         boost::hof::is_invocable<
             F, reference>::value,
         after_insert_connection_t
-    >::type
+    >
     after_insert(F&& f)
     {
         return _after_insert.connect

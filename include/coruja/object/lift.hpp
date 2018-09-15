@@ -33,8 +33,7 @@ public:
     using observed_t = T;
     using value_type = observed_t;
     using after_change_connection_t = connections<
-        typename std::remove_reference<Objects>::type
-        ::after_change_connection_t...>;
+        typename remove_reference_t<Objects>::after_change_connection_t...>;
 
     lift_object() = default;
                       
@@ -56,7 +55,7 @@ public:
         auto obj2conn = zip_view<Obj2Conn>(Obj2Conn(_objects, conns));
         
         for_each(obj2conn, detail::connect_object
-                 <From, Transform, F, after_change_connection_t>
+                 <From, Transform, remove_reference_t<F>, after_change_connection_t>
                  {_objects, _transform, f});
         
         return {std::move(conns)};
@@ -79,9 +78,9 @@ inline auto lift(Transform&& transform, Objects&&... objects)
 CORUJA_DECLTYPE_AUTO_RETURN
 (
     lift_object<
-        typename std::result_of<
-            Transform(typename std::remove_reference<Objects>::type::observed_t...)>::type,
-        detail::lift_to_observable_impl<typename std::remove_reference<Transform>::type>,
+        result_of_t<
+            Transform(typename remove_reference_t<Objects>::observed_t...)>,
+        detail::lift_to_observable_impl<remove_reference_t<Transform>>,
     decltype(view(std::declval<Objects>()))...>
     (view(std::forward<Objects>(objects))...,
      detail::lift_to_observable(std::forward<Transform>(transform)))

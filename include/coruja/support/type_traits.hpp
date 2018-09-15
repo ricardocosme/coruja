@@ -7,6 +7,7 @@
 #pragma once
 
 #include <type_traits>
+#include <boost/hof/is_invocable.hpp>
 #include <range/v3/range_concepts.hpp>
 
 namespace coruja { 
@@ -14,6 +15,28 @@ namespace coruja {
 //For std < c++17
 template<typename... Ts> struct make_void { typedef void type;};
 template<typename... Ts> using void_t = typename make_void<Ts...>::type;
+    
+template<typename Ret, typename F, typename... Args>
+using enable_if_is_invocable_t = typename std::enable_if<
+    boost::hof::is_invocable<F, Args...>::value,
+    Ret>::type;
+
+template<typename Ret, typename F, typename... Args>
+using enable_if_is_not_invocable_t = typename std::enable_if<
+    !boost::hof::is_invocable<F, Args...>::value,
+    Ret>::type;
+    
+    
+//For std < c++14
+template<typename T>
+using remove_reference_t = typename std::remove_reference<T>::type;
+
+template<bool v, typename T = void>
+using enable_if_t = typename std::enable_if<v, T>::type;
+
+template<typename T>
+using result_of_t = typename std::result_of<T>::type;
+
     
 template<typename T, typename = void>
 struct is_observable : std::false_type {};
@@ -81,10 +104,10 @@ Requirements:
 
 */
 template<typename T, typename = void>
-struct is_observable_object : std::false_type {};
+struct _is_observable_object : std::false_type {};
 
 template<typename T>
-struct is_observable_object<T, void_t<
+struct _is_observable_object<T, void_t<
     typename T::after_change_connection_t,
     decltype(
         std::declval<typename T::after_change_connection_t&>() =
@@ -94,6 +117,9 @@ struct is_observable_object<T, void_t<
 > : std::integral_constant<bool,
                            is_observable<T>::value>
 {};
+
+template<typename T>
+using is_observable_object = _is_observable_object<remove_reference_t<T>>;
     
 /*
 ObservableErasableRange

@@ -16,10 +16,10 @@
 namespace coruja {
 
 template<typename CharType, typename CharTrait, typename ObservableObject>
-inline typename std::enable_if<
+inline enable_if_t<
     is_observable_object<ObservableObject>::value,
     std::basic_ostream<CharType, CharTrait>&
->::type
+>
 operator<<(std::basic_ostream<CharType, CharTrait>& out,
            const ObservableObject& obj)
 {

@@ -45,6 +45,18 @@ int main()
         object_t();
     }
     
+    //lv | rv (rv is const)
+    {
+        object_t o1;
+        auto o2 = o1 | [](const object_t::value_type& s)
+                       { return s + "!"; };
+        bool called{false};
+        o2.after_change(check_str{called, "hello!"});
+        o1 = "hello";
+        BOOST_TEST(called);
+        BOOST_TEST(o2 == "hello!");
+    }
+    
     //transform(lv, rv) rv is const
     {
         object_t o1;
@@ -80,7 +92,7 @@ int main()
         BOOST_TEST(o2 == "hello!");
     }
     
-    //object | transform_object | transform_object (using lv)
+    //transform(transform(object)) (using lv)
     {
         object_t o1;
         auto o2 = transform(o1, append_space{});
@@ -93,12 +105,37 @@ int main()
         BOOST_TEST(o3 == "hello !");
     }
     
-    //object | transform_object | transform_object (using rv)
+    //object | transform_object | transform_object (using lv)
+    {
+        object_t o1;
+        auto o2 = o1 | append_space{};
+        auto o3 = o2 | append_exclamation{};
+        bool called{false};
+        o3.after_change(check_str{called, "hello !"});
+        o1 = "hello";
+        BOOST_TEST(called);
+        BOOST_TEST(o2 == "hello ");
+        BOOST_TEST(o3 == "hello !");
+    }
+    
+    //transform(transform(object)) (using rv)
     {
         object_t o1;
         
         auto o3 = transform(transform(o1, append_space{}),
                             append_exclamation{});
+        bool called{false};
+        o3.after_change(check_str{called, "hello !"});
+        o1 = "hello";
+        BOOST_TEST(called);
+        BOOST_TEST(o3 == "hello !");
+    }
+    
+    //object | transform_object | transform_object (using rv)
+    {
+        object_t o1;
+        
+        auto o3 = o1 | append_space{} | append_exclamation{};
         bool called{false};
         o3.after_change(check_str{called, "hello !"});
         o1 = "hello";

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "coruja/support/type_traits.hpp"
+
 #include <range/v3/range_traits.hpp>
 
 #include <utility>
@@ -62,21 +64,21 @@ public:
 
 template<typename ObservableErasableRange>
 inline
-typename std::enable_if<
+enable_if_t<
     !std::is_base_of<
         ranges::view_base, ObservableErasableRange>::value,    
     container_view<ObservableErasableRange>
->::type
+>
 view(ObservableErasableRange& rng)
 { return {rng}; }
     
 template<typename ObservableErasableRange>
 inline
-typename std::enable_if<
+enable_if_t<
     std::is_base_of<
-        ranges::view_base, typename std::remove_reference<ObservableErasableRange>::type>::value,
-    typename std::remove_reference<ObservableErasableRange>::type
->::type
+        ranges::view_base, remove_reference_t<ObservableErasableRange>>::value,
+    remove_reference_t<ObservableErasableRange>
+>
 view(ObservableErasableRange&& rng)
 { return std::forward<ObservableErasableRange>(rng); }
     

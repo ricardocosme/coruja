@@ -41,21 +41,21 @@ public:
         
 template<typename ObservableObject>
 inline
-typename std::enable_if<
+enable_if_t<
     !std::is_base_of<
         view_base, ObservableObject>::value,    
     object_view<ObservableObject>
->::type
+>
 view(ObservableObject& rng)
 { return {rng}; }
     
 template<typename ObservableObject>
 inline
-typename std::enable_if<
+enable_if_t<
     std::is_base_of<
-        view_base, typename std::remove_reference<ObservableObject>::type>::value,
-    typename std::remove_reference<ObservableObject>::type
->::type
+        view_base, remove_reference_t<ObservableObject>>::value,
+    remove_reference_t<ObservableObject>
+>
 view(ObservableObject&& rng)
 { return std::forward<ObservableObject>(rng); }
 

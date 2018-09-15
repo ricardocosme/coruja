@@ -9,16 +9,17 @@
 #include "coruja/object/object.hpp"
 #include "coruja/object/object_view.hpp"
 #include "coruja/object/detail/after_change_cbk.hpp"
+#include "coruja/object/detail/transform_aux.hpp"
 
 #include <range/v3/utility/semiregular.hpp>
 
 namespace coruja { 
     
-template<typename From, typename T, typename Transform>
+template<typename From, typename Transform>
 class transform_object : view_base
 {
 public:    
-    using observed_t = T;
+    using observed_t = result_of_t<Transform(detail::observed_t<From>)>;
     using value_type = observed_t;
     using after_change_connection_t = typename From::after_change_connection_t;
 
@@ -49,19 +50,18 @@ private:
     From _from;
 };
     
-template<typename ObservableObject,
-         typename F,
-         typename T2 = typename std::result_of<
-             F(typename std::remove_reference<ObservableObject>::type::observed_t)>::type,
-         typename Ret = transform_object<
-             decltype(view(std::declval<ObservableObject>())),
-             T2,
-             typename std::remove_reference<F>::type>>
-inline typename std::enable_if<
-    is_observable_object<
-             typename std::remove_reference<ObservableObject>::type>::value,
-    Ret>::type
+template<typename ObservableObject, typename F>
+inline enable_if_t<
+    is_observable_object<ObservableObject>::value,
+    detail::transform_object_t<ObservableObject, F>>
 transform(ObservableObject&& o, F&& f)
 { return {view(std::forward<ObservableObject>(o)), std::forward<F>(f)}; }
+
+template<typename ObservableObject, typename F>
+inline enable_if_t<
+    is_observable_object<ObservableObject>::value,
+    detail::transform_object_t<ObservableObject, F>>
+operator|(ObservableObject&& o, F&& f)
+{ return transform(std::forward<ObservableObject>(o), std::forward<F>(f)); }
     
 }

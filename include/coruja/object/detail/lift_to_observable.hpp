@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "coruja/support/type_traits.hpp"
 #include "coruja/support/macro.hpp"
 
 #include <type_traits>
@@ -21,17 +22,15 @@ struct lift_to_observable_impl : private F
     lift_to_observable_impl(F f) : F(std::move(f)) {}
     
     template<typename... Objects>
-    typename std::result_of<
-        F(typename std::remove_reference<Objects>::type::observed_t...)
-    >::type
-    operator()(Objects&&... objects)
-    { return F::operator()(objects.get()...); }
+    auto operator()(Objects&&... objects)
+    CORUJA_DECLTYPE_AUTO_RETURN
+    ( F::operator()(objects.get()...) )
 };
 
 template<typename F>
 inline auto lift_to_observable(F&& f)
 CORUJA_DECLTYPE_AUTO_RETURN
-( lift_to_observable_impl<typename std::remove_reference<F>::type>
+( lift_to_observable_impl<remove_reference_t<F>>
   {std::forward<F>(f)} )
         
 }}

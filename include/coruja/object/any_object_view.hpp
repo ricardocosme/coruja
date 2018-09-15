@@ -7,6 +7,7 @@
 #pragma once
 
 #include "coruja/support/signal.hpp"
+#include "coruja/support/type_traits.hpp"
 
 #include <functional>
 #include <memory>
@@ -62,11 +63,11 @@ public:
     any_object_view() = default;
     
     template<typename ObservableObject,
-             typename Enable = typename std::enable_if<
+             typename Enable = enable_if_t<
                  !std::is_same<
                      typename std::decay<ObservableObject>::type,
                      any_object_view>::value
-                 >::type>
+                 >>
     any_object_view(ObservableObject&& o)
         : _model(new model_t<ObservableObject>
                  (std::forward<ObservableObject>(o)))

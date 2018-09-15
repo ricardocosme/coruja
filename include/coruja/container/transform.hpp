@@ -84,7 +84,7 @@ class coruja_transform_view
             , _transform(std::move(transform))
         {}
 
-        typename std::result_of<Transform(ranges::range_reference_t<Rng>)>::type
+        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>
         read() const
         { return _transform(*_it); }
         
@@ -134,80 +134,59 @@ public:
     { return _rng.observed(); }
         
     template<typename F>
-    typename std::enable_if<
-        !boost::hof::is_invocable<
-            F,
-            typename std::result_of<Transform(ranges::range_reference_t<Rng>)>::type
-            >::value,
-        for_each_connection_t
-    >::type
+    coruja::enable_if_is_not_invocable_t<
+        for_each_connection_t, F,
+        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
     for_each(F&& f)
     { return _rng.for_each(invoke_observer(std::forward<F>(f))); }
     
     template<typename F>
-    typename std::enable_if<
-        boost::hof::is_invocable<
-            F,
-            typename std::result_of<Transform(ranges::range_reference_t<Rng>)>::type
-            >::value,
-        for_each_connection_t
-    >::type for_each(F&& f)
+    coruja::enable_if_is_invocable_t<
+        for_each_connection_t, F,
+        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
+    for_each(F&& f)
     { return _rng.for_each(invoke_observer_by_ref(std::forward<F>(f))); }
     
     template<typename F>
-    typename std::enable_if<
-        !boost::hof::is_invocable<
-            F,
-            typename std::result_of<Transform(ranges::range_reference_t<Rng>)>::type
-            >::value,
-        before_erase_connection_t
-    >::type
+    coruja::enable_if_is_not_invocable_t<
+        before_erase_connection_t, F,
+        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
     before_erase(F&& f)
     { return _rng.before_erase(invoke_observer(std::forward<F>(f))); }
     
     template<typename F>
-    typename std::enable_if<
-        boost::hof::is_invocable<
-            F,
-            typename std::result_of<Transform(ranges::range_reference_t<Rng>)>::type
-            >::value,
-        before_erase_connection_t
-    >::type before_erase(F&& f)
+    coruja::enable_if_is_invocable_t<
+        before_erase_connection_t, F,
+        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
+    before_erase(F&& f)
     { return _rng.before_erase(invoke_observer_by_ref(std::forward<F>(f))); }
 
     //Deprecated
     template<typename F>
-    typename std::enable_if<
-        !boost::hof::is_invocable<
-            F,
-            typename std::result_of<Transform(ranges::range_reference_t<Rng>)>::type
-            >::value,
-        after_insert_connection_t
-    >::type
+    coruja::enable_if_is_not_invocable_t<
+        after_insert_connection_t, F,
+        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
     after_insert(F&& f)
     { return _rng.after_insert(invoke_observer(std::forward<F>(f))); }
     
     //Deprecated
     template<typename F>
-    typename std::enable_if<
-        boost::hof::is_invocable<
-            F,
-            typename std::result_of<Transform(ranges::range_reference_t<Rng>)>::type
-            >::value,
-        after_insert_connection_t
-    >::type after_insert(F&& f)
+    coruja::enable_if_is_invocable_t<
+        after_insert_connection_t, F,
+        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
+    after_insert(F&& f)
     { return _rng.after_insert(invoke_observer_by_ref(std::forward<F>(f))); }
 };
 
 namespace coruja {
 
 template<typename ObservableErasableRange, typename F>
-inline typename std::enable_if<
+inline enable_if_t<
     is_observable_erasable_range<
         typename std::decay<ObservableErasableRange>::type>::value,
     coruja_transform_view<decltype(view(std::declval<ObservableErasableRange>())),
-                          typename std::remove_reference<F>::type>
->::type
+                          remove_reference_t<F>>
+>
 transform(ObservableErasableRange&& rng, F&& f)
 { return {view(rng), std::forward<F>(f)}; }
     

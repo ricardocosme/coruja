@@ -60,10 +60,9 @@ public:
     }
     
     template<typename U>
-    typename std::enable_if<
-        !std::is_same<typename std::remove_reference<U>::type,
-                      Derived>::value,
-        Derived&>::type
+    enable_if_t<
+        !std::is_same<remove_reference_t<U>, Derived>::value,
+        Derived&>
     operator=(U&& rhs)
     {
         _observed = std::forward<U>(rhs);
@@ -78,17 +77,13 @@ public:
     { return get(); }
     
     template<typename F>
-    typename std::enable_if<
-        boost::hof::is_invocable<F, Derived&>::value,
-        after_change_connection_t
-    >::type after_change(F&& f)
+    enable_if_is_invocable_t<after_change_connection_t, F, Derived&>
+    after_change(F&& f)
     { return _after_change.connect(std::forward<F>(f)); }
     
     template<typename F>
-    typename std::enable_if<
-        boost::hof::is_invocable<F, const observed_t&>::value,
-        after_change_connection_t
-    >::type after_change(F&& f)
+    enable_if_is_invocable_t<after_change_connection_t, F, const observed_t&>
+    after_change(F&& f)
     { return _after_change.connect
             (detail::lift_to_observable(std::forward<F>(f))); }
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "coruja/support/signal/signal.hpp"
+#include "coruja/support/type_traits.hpp"
 #include "coruja/support/signal/scoped_blocked_connection.hpp"
 
 #include <memory>
@@ -126,12 +127,12 @@ public:
     }
     
     template<typename T,
-             typename Enable = typename std::enable_if<
+             typename Enable = enable_if_t<
                  !std::is_same<
                      any_connection,
                      typename std::decay<T>::type
                  >::value
-             >::type>
+             >>
     any_connection(T&& o)
         : _base(&model_t<typename std::decay<T>::type, is_small_t<T>::value>::vtable)
     {
