@@ -7,17 +7,15 @@ using namespace coruja;
 
 inline void body(benchmark::State& state, vector<int>& a)
 {
+    a.reserve(state.range(0));
     for(std::size_t i(0);i<state.range(0);++i)
         a.push_back(i);
-    state.PauseTiming();
     a.clear();
-    state.ResumeTiming();
 }
 
 void BM_AdHoc(benchmark::State& state) {
     std::string s;
     vector<int> a;
-    a.reserve(state.range(0));
     a.for_each([&s](int i){ s = "_" + std::to_string(i); });
     for (auto _ : state)
         body(state, a);
@@ -27,7 +25,6 @@ BENCHMARK(BM_AdHoc)->Arg(1)->Arg(10)->Arg(100)->Arg(1000)->Arg(10000)->Arg(10000
 void BM_Transform(benchmark::State& state) {
     std::string s;
     vector<int> a;
-    a.reserve(state.range(0));
     auto rng = transform(transform(a, [](int i){return std::to_string(i);}),
                          [](std::string&& s){return "_" + std::move(s);});
     rng.for_each([&s](std::string&& v){ s = std::move(v); });
