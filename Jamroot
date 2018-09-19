@@ -47,6 +47,7 @@ run test/transform_object.cpp ;
 run test/signal.cpp ;
 run test/container_view.cpp ;
 run test/transform_vector.cpp ;
+run test/list.cpp ;
 run test/vector.cpp ;
 run test/vector_as_base.cpp ;
 
