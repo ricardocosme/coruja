@@ -39,7 +39,7 @@ class coruja_transform_view
     };
     
     template<typename F>
-    struct invoke_observer_impl : invoke_observer_base<F>
+    struct invoke_observer_impl : private invoke_observer_base<F>
     {
         using base = invoke_observer_base<F>;
         using base::base;
@@ -51,12 +51,10 @@ class coruja_transform_view
             auto rng = coruja_transform_view{from, base::as_transform()};
             base::_f(rng, next(begin(rng), distance(begin(from), it)));
         }
-    private:
-        using invoke_observer_base<F>::operator();
     };
         
     template<typename F>
-    struct invoke_observer_by_ref_impl : invoke_observer_base<F>
+    struct invoke_observer_by_ref_impl : private invoke_observer_base<F>
     {
         using base = invoke_observer_base<F>;
         using base::base;
