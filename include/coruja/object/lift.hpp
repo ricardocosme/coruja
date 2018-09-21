@@ -69,7 +69,7 @@ public:
     
 private:
 
-    mutable ranges::semiregular_t<Transform> _transform;
+    ranges::semiregular_t<Transform> _transform;
     From _objects;
 };
 
