@@ -4,6 +4,8 @@
 // (See accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
+#pragma once
+
 #include <boost/core/lightweight_test.hpp>
 #include <initializer_list>
 
@@ -15,3 +17,10 @@ inline void check_equal(ocontainer& c, std::initializer_list<value_type> il)
     for(auto&& e : c)
         BOOST_TEST(e == *it++);
 }
+
+// template<typename ocontainer, typename expected_t>
+// void check_equal(const ocontainer& c, const expected_t& expected)
+// {
+//     BOOST_TEST(c.size() == expected.size());
+//     for(auto& e : c) BOOST_TEST(expected.at(e.first) == e.second);
+// }

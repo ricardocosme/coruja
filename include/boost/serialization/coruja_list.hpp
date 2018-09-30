@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <coruja/container/vector.hpp>
+#include <coruja/container/list.hpp>
 #include <boost/serialization/coruja_sequence.hpp>
 
 namespace boost { namespace serialization {
-        
+
 template<typename Archive,
          typename T,
          typename Allocator,
@@ -18,7 +18,7 @@ template<typename Archive,
          typename Derived,
          template <typename> class Signal>
 inline void save(Archive& ar,
-                 const coruja::vector<
+                 const coruja::list<
                      T,
                      Allocator,
                      Observed,
@@ -34,7 +34,7 @@ template<typename Archive,
          typename Derived,
          template <typename> class Signal>
 inline void load(Archive& ar,
-                 coruja::vector<
+                 coruja::list<
                      T,
                      Allocator,
                      Observed,
@@ -50,7 +50,7 @@ template<typename Archive,
          typename Derived,
          template <typename> class Signal>
 inline void serialize (Archive& ar,
-                       coruja::vector<
+                       coruja::list<
                            T,
                            Allocator,
                            Observed,

@@ -92,11 +92,6 @@ private:
     observed_t _observed;    
     after_change_t _after_change;
     
-    //TODO: FixMe. It's a workaround to reactive_class
-    template<typename F>
-    after_change_connection_t r_after_change(F&& f)
-    { return _after_change.connect
-            (detail::lift_to_observable(std::forward<F>(f))); }
 };        
 
 }

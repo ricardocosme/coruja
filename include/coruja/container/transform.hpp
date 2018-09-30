@@ -118,9 +118,6 @@ public:
     using for_each_connection_t = typename Rng::for_each_connection_t;
     using before_erase_connection_t = typename Rng::before_erase_connection_t;
 
-    //Deprecated
-    using after_insert_connection_t = typename Rng::after_insert_connection_t;
-    
     coruja_transform_view() = default;
     
     coruja_transform_view(Rng rng, Transform transform)
@@ -158,22 +155,6 @@ public:
         coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
     before_erase(F&& f)
     { return _rng.before_erase(invoke_observer_by_ref(std::forward<F>(f))); }
-
-    //Deprecated
-    template<typename F>
-    coruja::enable_if_is_not_invocable_t<
-        after_insert_connection_t, F,
-        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
-    after_insert(F&& f)
-    { return _rng.after_insert(invoke_observer(std::forward<F>(f))); }
-    
-    //Deprecated
-    template<typename F>
-    coruja::enable_if_is_invocable_t<
-        after_insert_connection_t, F,
-        coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>>
-    after_insert(F&& f)
-    { return _rng.after_insert(invoke_observer_by_ref(std::forward<F>(f))); }
 };
 
 namespace coruja {

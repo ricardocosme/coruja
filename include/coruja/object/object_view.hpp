@@ -28,10 +28,10 @@ public:
     
     object_view(ObservableObject& o) : _obj(&o) {}
 
-    const observed_t& get() const noexcept
-    { return _obj->get(); }
+    observed_t get() const noexcept
+    { return _obj->observed(); }
 
-    const observed_t& observed() const noexcept
+    observed_t observed() const noexcept
     { return get(); }
     
     template<typename F>

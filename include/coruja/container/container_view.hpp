@@ -26,9 +26,6 @@ public:
     using for_each_connection_t = typename Rng::for_each_connection_t;
     using before_erase_connection_t = typename Rng::before_erase_connection_t;
 
-    //Deprecated
-    using after_insert_connection_t = typename Rng::after_insert_connection_t;
-    
     container_view() = default;
     
     container_view(Rng& o) : _rng(&o) {}
@@ -47,11 +44,6 @@ public:
     
     const observed_t& observed() const noexcept
     { return _rng->observed(); }
-    
-    //Deprecated
-    template<typename F>
-    after_insert_connection_t after_insert(F&& f)
-    { return _rng->after_insert(std::forward<F>(f)); }
     
     template<typename F>
     for_each_connection_t for_each(F&& f)

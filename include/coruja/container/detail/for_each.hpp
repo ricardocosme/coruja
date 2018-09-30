@@ -26,7 +26,7 @@ template<typename F>
 struct fwd_by_it
 {
     template<typename Derived, typename It>
-    void operator()(Derived& derived, It it) const
+    void operator()(Derived& derived, It it) 
     { f(derived, it); }
     F& f;
 };
@@ -35,7 +35,7 @@ template<typename F>
 struct fwd_by_ref
 {
     template<typename Derived, typename It>
-    void operator()(Derived&, It it) const
+    void operator()(Derived&, It it) 
     { f(*it); }
     F& f;
 };

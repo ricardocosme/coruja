@@ -41,19 +41,27 @@ project coruja
   ;
 
 run test/any_object_view.cpp ;
+run test/boost_optional.cpp ;
+run test/boost_variant.cpp ;
 run test/object.cpp ;
 run test/lift_object.cpp ;
 run test/transform_object.cpp ;
 run test/signal.cpp ;
 run test/container_view.cpp ;
 run test/transform_vector.cpp ;
+run test/map.cpp ;
+run test/unordered_map.cpp ;
 run test/list.cpp ;
 run test/vector.cpp ;
+run test/set.cpp ;
 run test/vector_as_base.cpp ;
+run test/observer_class.cpp ;
 
 run test/boost_serialization_object.cpp
 : : : <library>/boost//serialization <library>/boost//filesystem ;
 run test/boost_serialization_vector.cpp
+: : : <library>/boost//serialization <library>/boost//filesystem ;
+run test/boost_serialization_list.cpp
 : : : <library>/boost//serialization <library>/boost//filesystem ;
   
 exe fullname_demo
