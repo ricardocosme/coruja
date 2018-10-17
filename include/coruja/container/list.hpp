@@ -43,8 +43,8 @@ class list : public sequence_container<
     template<typename F, template <typename> class Fwd, typename Container>
     friend typename Container::for_each_connection_t detail::for_each_by(Container&, F&&);
 
-    friend struct list_serialization;
-        
+    friend struct sequence_serialization;
+    
 public:
     
     using typename base::observed_t;

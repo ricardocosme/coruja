@@ -11,6 +11,20 @@
 
 namespace boost { namespace serialization {
         
+template<typename T,
+         typename Allocator,
+         template <typename, typename> class Observed,
+         typename Derived,
+         template <typename> class Signal>
+void pre_load(coruja::vector<
+                  T,
+                  Allocator,
+                  Observed,
+                  Derived,
+                  Signal>& o,
+              typename Observed<T, Allocator>::size_type count)
+{ o.reserve(count); }
+
 template<typename Archive,
          typename T,
          typename Allocator,

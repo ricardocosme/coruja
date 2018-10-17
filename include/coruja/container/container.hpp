@@ -124,14 +124,16 @@ public:
     
     void swap(Derived& other) noexcept
     {
+        auto& cother = static_cast<container&>(other);
+        
         if(!_container.empty())
             emit_before_erase(begin(), end());
-        if(!other._container.empty())
-            other._before_erase(other.as_derived(),
-                                other.begin(), other.end());
-        _container.swap(other._container);
+        if(!cother._container.empty())
+            cother._before_erase(cother.as_derived(),
+                                cother.begin(), cother.end());
+        _container.swap(cother._container);
         emit_after_insert(begin(), end());
-        other.emit_after_insert(other.begin(), other.end());
+        cother.emit_after_insert(cother.begin(), cother.end());
     }
 
     void swap(observed_t& otherContainer) noexcept

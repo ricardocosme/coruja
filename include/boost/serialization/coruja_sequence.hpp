@@ -31,35 +31,17 @@ struct sequence_serialization
     }
      
     template<typename Archive, typename T>
-    typename boost::enable_if<
-        typename boost::serialization::detail::is_default_constructible<
-            typename T::value_type>,
-        void
-        >::type
-    static stl_collection_load_impl
+    static void stl_collection_load_impl
     (Archive& ar,
      T& o,
      boost::serialization::collection_size_type count,
      boost::serialization::item_version_type item_version)
     {
+        o.clear();
         boost::serialization::stl::collection_load_impl
-            (ar, o, count, item_version);
+            (ar, o._container, count, item_version);
         o._after_insert(o.as_derived(), o.begin(), o.end());
     }
-    
-    template<typename Archive, typename T>
-    typename boost::disable_if<
-        typename boost::serialization::detail::is_default_constructible<
-            typename T::value_type>,
-        void
-        >::type
-    static stl_collection_load_impl
-    (Archive& ar,
-     T& o,
-     boost::serialization::collection_size_type count,
-     boost::serialization::item_version_type item_version)
-    { boost::serialization::stl::collection_load_impl
-            (ar, o, count, item_version); }
     
     template<typename Archive, typename Sequence>
     static void load(Archive& ar, Sequence& o,
