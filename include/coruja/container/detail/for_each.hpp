@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "coruja/support/type_traits.hpp"
+
 #include <utility>
 
 namespace coruja { namespace detail {
@@ -19,7 +21,7 @@ struct for_each_impl
         for(;first != last; ++first)
             Fwd{f}(derived, first);
     }
-    F f;
+    remove_reference_t<F> f;
 };
 
 template<typename F>

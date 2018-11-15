@@ -64,6 +64,8 @@ run test/boost_serialization_vector.cpp
 run test/boost_serialization_list.cpp
 : : : <library>/boost//serialization <library>/boost//filesystem ;
   
+run test/bug_before_erase_lvalue.cpp ;
+
 exe fullname_demo
   : demo/fullname.cpp
   : <cxxflags>-std=c++14
