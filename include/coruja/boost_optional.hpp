@@ -7,6 +7,7 @@
 #pragma once
 
 #include "coruja/object/detail/lift_to_observable.hpp"
+#include "coruja/object/object_base.hpp"
 #include "coruja/support/signal.hpp"
 #include "coruja/support/type_traits.hpp"
 
@@ -23,32 +24,33 @@ namespace serialization {
 template<typename T,
          class Derived_ = void,
          template <typename> class Signal = signal>
-class optional
-{
-    using Derived = typename std::conditional<
+class optional : public object_base<
+    boost::optional<T>,
+    typename std::conditional<
         std::is_same<Derived_, void>::value,
-        optional, Derived_
-    >::type;
-
-    Derived& as_derived() noexcept
-    { return static_cast<Derived&>(*this); }
-    
-    const Derived& as_derived() const noexcept
-    { return static_cast<const Derived&>(*this); }
+        optional<T, Derived_, Signal>, Derived_
+    >::type,
+    Signal>
+{
+    using base = object_base
+        <boost::optional<T>,
+         typename std::conditional<
+             std::is_same<Derived_, void>::value,
+             optional, Derived_
+             >::type,
+         Signal>;
         
-    using after_change_t = Signal<void(Derived&)>;
-    
+    using typename base::Derived;
+
 public:
     
-    using observed_t = boost::optional<T>;
-    using after_change_connection_t = typename after_change_t::connection_t;
+    using typename base::observed_t;
+    using typename base::after_change_connection_t;
 
 private:
     
     observed_t _observed;
     
-    after_change_t _after_change;
-
     friend serialization::optional;
     
 public:
@@ -82,36 +84,36 @@ public:
     optional& operator=(optional<U>&& o) 
     {
         _observed = std::move(o.observed());
-        _after_change(as_derived());
+        base::_after_change(base::as_derived());
         return *this;
     }
 
     optional& operator=(T val)
     {
         _observed = std::move(val);
-        _after_change(as_derived());
+        base::_after_change(base::as_derived());
         return *this;
     }
     
     optional& operator=(boost::none_t none) noexcept
     {
         _observed = none;
-        _after_change(as_derived());
+        base::_after_change(base::as_derived());
         return *this;
     }
 
     optional(optional&& rhs)
         noexcept(std::is_nothrow_move_constructible<observed_t>::value)
-        : _observed(std::move(rhs._observed))
-        , _after_change(std::move(rhs._after_change))
+        : base(std::move(rhs))
+        , _observed(std::move(rhs._observed))
     {
     }
     
     optional& operator=(optional&& rhs)
         noexcept(std::is_nothrow_move_assignable<observed_t>::value)
     {
+        base::operator=(std::move(rhs));
         _observed = std::move(rhs._observed);
-        _after_change = std::move(rhs._after_change);
         return *this;
     }
 
@@ -135,16 +137,6 @@ public:
     const observed_t& observed() const noexcept
     { return _observed; }
     
-    template<typename F>
-    enable_if_is_invocable_t<after_change_connection_t, F, Derived&>
-    after_change(F&& f)
-    { return _after_change.connect(std::forward<F>(f)); }
-    
-    template<typename F>
-    enable_if_is_invocable_t<after_change_connection_t, F, const observed_t&>
-    after_change(F&& f)
-    { return _after_change.connect
-            (detail::lift_to_observable(std::forward<F>(f))); }
 };
     
 //

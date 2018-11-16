@@ -69,6 +69,13 @@ int main()
         ov = "change";
         BOOST_TEST(called);
         BOOST_TEST(ov == "change");
+        bool for_each_called{false};
+        ov.for_each([&for_each_called, &ov](const object_t::value_type& v)
+                    {
+                        for_each_called = true;
+                        BOOST_TEST(v == "change");
+                    });
+        BOOST_TEST(for_each_called);
     }
     
     //operator=(T&&) - cbk(object&)
@@ -84,6 +91,14 @@ int main()
         ov = "change";
         BOOST_TEST(called);
         BOOST_TEST(ov == "change");
+        bool for_each_called{false};
+        ov.for_each([&for_each_called, &ov](object_t& v)
+                    {
+                        for_each_called = true;
+                        BOOST_TEST(v == "change");
+                        BOOST_TEST(&ov == &v);
+                    });
+        BOOST_TEST(for_each_called);
     }
     
     //operator=(T&&) - cbk(Derived&)
@@ -99,6 +114,14 @@ int main()
         ov = "change";
         BOOST_TEST(called);
         BOOST_TEST(ov == "change");
+        bool for_each_called{false};
+        ov.for_each([&for_each_called, &ov](custom_string& v)
+                    {
+                        for_each_called = true;
+                        BOOST_TEST(v == "change");
+                        BOOST_TEST(&ov == &v);
+                    });
+        BOOST_TEST(for_each_called);
     }
     
     //object(object&&)

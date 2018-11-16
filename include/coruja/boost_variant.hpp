@@ -8,6 +8,7 @@
 
 #include "coruja/detail/match_visitor.hpp"
 #include "coruja/object/detail/lift_to_observable.hpp"
+#include "coruja/object/object_base.hpp"
 #include "coruja/support/signal.hpp"
 #include "coruja/support/type_traits.hpp"
 
@@ -31,64 +32,72 @@ namespace serialization {
     struct variant;
 }
 
-template<typename Variant, typename E = void>
+template<typename Variant, typename TPack, typename E = void>
 struct derived_or_this {
     using type = Variant;
 };
     
-template<typename Variant>
-struct derived_or_this
-    <Variant, typename std::enable_if<
-                  std::is_base_of<derived_base,
-                                  typename boost::mpl::back<typename Variant::tpack>::type
-                                  >::value>::type>
+template<typename Variant, typename TPack>
+struct derived_or_this<
+    Variant, TPack, typename std::enable_if<
+                        std::is_base_of<derived_base,
+                                        typename boost::mpl::back<TPack>::type
+                                        >::value>::type>
 {
-    using type = typename boost::mpl::back<typename Variant::tpack>::type::type;
+    using type = typename boost::mpl::back<TPack>::type::type;
 };
     
 template<typename... T>
-class variant
+class variant : public object_base<
+    typename std::conditional<
+        std::is_same<
+            typename derived_or_this<variant<T...>,
+                                     boost::mpl::vector<T...>>::type,
+            variant<T...>>::value,
+        boost::variant<T...>,
+        typename boost::make_variant_over<
+            typename boost::mpl::pop_back<boost::mpl::vector<T...>>::type>::type
+        >::type,
+    typename derived_or_this<variant<T...>, boost::mpl::vector<T...>>::type,
+    signal>
 {
-    using tpack = boost::mpl::vector<T...>;
-    template<typename, typename>
-    friend struct derived_or_this;
+    using base = object_base<
+        typename std::conditional<
+            std::is_same<
+                typename derived_or_this<variant<T...>,
+                                         boost::mpl::vector<T...>>::type,
+                variant<T...>>::value,
+            boost::variant<T...>,
+            typename boost::make_variant_over<
+                typename boost::mpl::pop_back<boost::mpl::vector<T...>>::type
+                >::type
+            >::type,
+        typename derived_or_this<variant<T...>, boost::mpl::vector<T...>>::type,
+        signal>;
     
-    using Derived = typename derived_or_this<variant<T...>>::type;
-    
-    Derived& as_derived() noexcept
-    { return static_cast<Derived&>(*this); }
-    
-    const Derived& as_derived() const noexcept
-    { return static_cast<const Derived&>(*this); }
+    using typename base::Derived;
     
 public:
 
-    using observed_t = typename std::conditional<
-       std::is_same<Derived, variant<T...>>::value,
-           boost::variant<T...>,
-           typename boost::make_variant_over<typename boost::mpl::pop_back<tpack>::type>::type
-       >::type;
-
-private:
+    using typename base::observed_t;
     
-    using after_change_t = signal<void(Derived&)>;
-    
-public:
-    
-    using after_change_type_connection_t = typename after_change_t::connection_t;
-    using after_change_connection_t = typename after_change_t::connection_t;
+    using after_change_type_connection_t =
+        typename base::after_change_t::connection_t;
+    using after_change_connection_t =
+        typename base::after_change_t::connection_t;
     
 private:
     
     observed_t _observed;    
-    after_change_t _after_change, _after_change_type;
+    typename base::after_change_t _after_change_type;
 
     friend serialization::variant;
     
 public:
-    using types = typename observed_t::types;
+    using types = typename base::observed_t::types;
 
-    variant() noexcept(std::is_nothrow_default_constructible<observed_t>::value) {}
+    variant() noexcept(std::is_nothrow_default_constructible<observed_t>::value)
+    {}
 
     template<typename U>
     variant(U o)
@@ -101,15 +110,15 @@ public:
         auto before_type = _observed.which();
         _observed = std::forward<U>(o);
         if(before_type != _observed.which())
-            _after_change_type(as_derived());
-        _after_change(as_derived());
+            _after_change_type(base::as_derived());
+        base::_after_change(base::as_derived());
         return *this;
     }
 
     variant(variant&& rhs)
         noexcept(std::is_nothrow_move_constructible<observed_t>::value)
-        : _observed(std::move(rhs._observed))
-        , _after_change(std::move(rhs._after_change))
+        : base(std::move(rhs))
+        , _observed(std::move(rhs._observed))
         , _after_change_type(std::move(rhs._after_change_type))
     {
     }
@@ -117,8 +126,8 @@ public:
     variant& operator=(variant&& rhs)
         noexcept(std::is_nothrow_move_assignable<observed_t>::value)
     {
+        base::operator=(std::move(rhs));
         _observed = std::move(rhs._observed);
-        _after_change = std::move(rhs._after_change);
         _after_change_type = std::move(rhs._after_change_type);
         return *this;
     }
@@ -166,17 +175,6 @@ public:
         
     const observed_t& observed() const noexcept
     { return _observed; }
-    
-    template<typename F>
-    enable_if_is_invocable_t<after_change_connection_t, F, Derived&>
-    after_change(F&& f)
-    { return _after_change.connect(std::forward<F>(f)); }
-    
-    template<typename F>
-    enable_if_is_invocable_t<after_change_connection_t, F, const observed_t&>
-    after_change(F&& f)
-    { return _after_change.connect
-            (detail::lift_to_observable(std::forward<F>(f))); }
     
     template<typename F>
     after_change_type_connection_t after_change_type(F&& f)

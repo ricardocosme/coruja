@@ -64,7 +64,7 @@ int main()
     //optional=(optional<U>&&)
     {
         coruja::optional<std::string> v;
-        bool called{true};
+        bool called{false};
         v.after_change
             ([&called](optional_t::observed_t)
              { called = true; });
@@ -72,12 +72,17 @@ int main()
         BOOST_TEST(v);
         BOOST_TEST(called);
         BOOST_TEST(v.get() == "abc");
+        bool for_each_called{false};
+        v.for_each
+            ([&for_each_called](optional_t::observed_t)
+             { for_each_called = true; });
+        BOOST_TEST(for_each_called);
     }
 
     //optional=(T)
     {
         coruja::optional<std::string> v;
-        bool called{true};
+        bool called{false};
         v.after_change
             ([&called](optional_t::observed_t)
              { called = true; });
@@ -90,7 +95,7 @@ int main()
     //optional=(boost::none_t)
     {
         coruja::optional<std::string> v;
-        bool called{true};
+        bool called{false};
         v.after_change
             ([&called](optional_t::observed_t)
              { called = true; });
@@ -102,7 +107,7 @@ int main()
     //optional(optional&&)
     {
         coruja::optional<std::string> v;
-        bool called{true};
+        bool called{false};
         v.after_change
             ([&called](optional_t::observed_t)
              { called = true; });
@@ -116,7 +121,7 @@ int main()
     //optional=(optional&&)
     {
         coruja::optional<std::string> v;
-        bool called{true};
+        bool called{false};
         v.after_change
             ([&called](optional_t::observed_t)
              { called = true; });
