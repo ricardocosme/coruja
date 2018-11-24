@@ -45,6 +45,7 @@ public:
     { return _after_change.connect
             (detail::lift_to_observable(std::forward<F>(f))); }
 
+    //Experimental
     template<typename F>
     enable_if_is_invocable_t<after_change_connection_t, F, Derived&>
     for_each(F&& f)
@@ -53,6 +54,7 @@ public:
         return after_change(std::forward<F>(f));
     }
     
+    //Experimental
     template<typename F>
     enable_if_is_invocable_t<after_change_connection_t, F, const observed_t&>
     for_each(F&& f)
@@ -60,7 +62,6 @@ public:
         detail::lift_to_observable_impl<F&>{f}(as_derived());
         return after_change(std::forward<F>(f));
     }
-    
 };
     
 }

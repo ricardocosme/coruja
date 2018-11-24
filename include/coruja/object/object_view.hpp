@@ -37,6 +37,11 @@ public:
     template<typename F>
     after_change_connection_t after_change(F&& f)
     { return _obj->after_change(std::forward<F>(f)); }
+    
+    //Experimental
+    template<typename F>
+    after_change_connection_t for_each(F&& f)
+    { return _obj->for_each(std::forward<F>(f)); }
 };
         
 template<typename ObservableObject>

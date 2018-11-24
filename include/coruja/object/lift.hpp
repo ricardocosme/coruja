@@ -45,18 +45,37 @@ public:
     template<typename F>
     after_change_connection_t after_change(F&& f)
     {
-        using namespace boost::fusion;
-
         using conns_t = typename after_change_connection_t::type;
-        using Obj2Conn = vector<From&, conns_t&>;
+        using Obj2Conn = boost::fusion::vector<From&, conns_t&>;
 
         conns_t conns;
         
-        auto obj2conn = zip_view<Obj2Conn>(Obj2Conn(_objects, conns));
+        auto obj2conn = boost::fusion::zip_view<Obj2Conn>(Obj2Conn(_objects, conns));
         
-        for_each(obj2conn, detail::connect_object
-                 <From, Transform, remove_reference_t<F>, after_change_connection_t>
-                 {_objects, _transform, f});
+        boost::fusion::for_each
+            (obj2conn, detail::connect_object
+             <From, Transform, remove_reference_t<F>, after_change_connection_t>
+             {_objects, _transform, f});
+        
+        return {std::move(conns)};
+    }
+
+    //Experimental: Yep, we have code duplication here but this is a
+    //temp stage.
+    template<typename F>
+    after_change_connection_t for_each(F&& f)
+    {
+        using conns_t = typename after_change_connection_t::type;
+        using Obj2Conn = boost::fusion::vector<From&, conns_t&>;
+
+        conns_t conns;
+        
+        auto obj2conn = boost::fusion::zip_view<Obj2Conn>(Obj2Conn(_objects, conns));
+        
+        boost::fusion::for_each
+            (obj2conn, detail::connect_object_for_each
+             <From, Transform, remove_reference_t<F>, after_change_connection_t>
+             {_objects, _transform, f});
         
         return {std::move(conns)};
     }

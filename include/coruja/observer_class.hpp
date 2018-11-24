@@ -46,6 +46,14 @@ class observer_class : public detail::base_or_empty<Base>
     }
 
     template<typename To, typename Reaction>
+    any_connection observe(To& to, Reaction&& reaction, detail::tag::obj_for_each)
+    {
+        return to.for_each
+            (reaction_wrapper<To, detail::after_change_cbk>
+             (std::forward<Reaction>(reaction)));
+    }
+    
+    template<typename To, typename Reaction>
     any_connection observe(To& to, Reaction&& reaction, detail::tag::after_insert)
     {
         return to.after_insert
@@ -99,6 +107,16 @@ public:
     any_connection observe(To& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::after_change>
+            (to, std::forward<Reaction>(reaction));
+    }
+    
+    //Experimental: In the best scenario, this implementation should
+    //be renamed to `observe` when `object::after_change` is replaced
+    //by `object::for_each`.
+    template<typename To, typename Reaction>
+    any_connection observe_obj_for_each(To& to, Reaction&& reaction)
+    {
+        return observe_impl<detail::tag::obj_for_each>
             (to, std::forward<Reaction>(reaction));
     }
     

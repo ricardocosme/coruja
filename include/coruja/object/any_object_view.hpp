@@ -25,6 +25,7 @@ class any_object_view
         virtual T get() const noexcept = 0;
         virtual T observed() const noexcept = 0;
         virtual any_connection after_change(std::function<void(const T&)>) = 0;
+        virtual any_connection for_each(std::function<void(const T&)>) = 0;
     };
 
     template<typename ObservableObject>
@@ -48,6 +49,9 @@ class any_object_view
         
         any_connection after_change(std::function<void(const T&)> f) override
         { return _obj.after_change(std::move(f)); }
+        
+        any_connection for_each(std::function<void(const T&)> f) override
+        { return _obj.for_each(std::move(f)); }
         
         ObservableObject _obj;
     };
@@ -95,6 +99,11 @@ public:
     template<typename F>
     after_change_connection_t after_change(F&& f)
     { return _model->after_change(std::forward<F>(f)); }
+
+    //Experimental
+    template<typename F>
+    after_change_connection_t for_each(F&& f)
+    { return _model->for_each(std::forward<F>(f)); }
 };
         
 }

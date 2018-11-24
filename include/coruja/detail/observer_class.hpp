@@ -15,6 +15,7 @@ namespace coruja { namespace detail {
 
 namespace tag {
 struct after_change{};
+struct obj_for_each{};
 struct for_each{};
 struct before_erase{};
 struct after_insert{};
