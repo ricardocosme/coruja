@@ -57,8 +57,10 @@ public:
 template<typename ObservableErasableRange>
 inline
 enable_if_t<
-    !std::is_base_of<
-        ranges::view_base, ObservableErasableRange>::value,    
+    (!std::is_base_of<
+     ranges::view_base, ObservableErasableRange>::value)
+    &&
+    is_observable_erasable_range<ObservableErasableRange>::value,
     container_view<ObservableErasableRange>
 >
 view(ObservableErasableRange& rng)
