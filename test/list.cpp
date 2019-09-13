@@ -59,4 +59,45 @@ int main()
         BOOST_TEST(lst.size() == 1);
         BOOST_TEST(lst.front() == "def");
     }
+
+    //splice - empty other
+    {
+        slist lst({"abc", "def", "ghi"});
+        slist::observed_t other;
+        std::vector<slist::value_type> after;
+        lst.for_each([&](slist::value_type o)
+                    { after.push_back(o); });
+        lst.splice(lst.end(), other);
+        BOOST_TEST((after == std::vector<std::string>
+            {"abc", "def", "ghi"}));
+        BOOST_TEST(lst.size() == 3);
+        BOOST_TEST(lst.back() == "ghi");
+    }
+    
+    //splice
+    {
+        slist lst({"abc", "def", "ghi"});
+        slist::observed_t other({"jkl", "mno"});
+        std::vector<slist::value_type> after;
+        lst.for_each([&](slist::value_type o)
+                    { after.push_back(o); });
+        lst.splice(lst.end(), other);
+        BOOST_TEST((after == std::vector<std::string>
+            {"abc", "def", "ghi", "jkl", "mno"}));
+        BOOST_TEST(lst.size() == 5);
+        BOOST_TEST(lst.back() == "mno");
+    }
+
+    //splice, other as a rvalue
+    {
+        slist lst({"abc", "def", "ghi"});
+        std::vector<slist::value_type> after;
+        lst.for_each([&](slist::value_type o)
+                    { after.push_back(o); });
+        lst.splice(lst.end(), slist::observed_t{"jkl", "mno"});
+        BOOST_TEST((after == std::vector<std::string>
+            {"abc", "def", "ghi", "jkl", "mno"}));
+        BOOST_TEST(lst.size() == 5);
+        BOOST_TEST(lst.back() == "mno");
+    }
 }
