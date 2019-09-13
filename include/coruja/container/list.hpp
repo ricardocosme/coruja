@@ -136,6 +136,9 @@ public:
         emit_after_insert(_container.begin(), std::next(_container.begin()));
     }
         
+    void remove(const T& value)
+    { remove_if([&](const value_type& e){ return e == value; }); }
+    
     template<typename Predicate>
     void remove_if(Predicate predicate)
     {
