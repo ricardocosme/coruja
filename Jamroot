@@ -7,7 +7,7 @@ if ! $(boost_root_path)
 
 use-project boost : $(boost_root_path) ;
 
-local range-v3_path = [ os.environ RANGE-V3 ] ;
+local range-v3_path = [ os.environ RANGE_V3_ROOT ] ;
 if ! $(range-v3_path)
 { range-v3_path = "../range-v3" ; }
 
@@ -56,6 +56,7 @@ run test/vector.cpp ;
 run test/set.cpp ;
 run test/vector_as_base.cpp ;
 run test/observer_class.cpp ;
+run test/for_each.cpp ;
 
 run test/boost_serialization_object.cpp
 : : : <library>/boost//serialization <library>/boost//filesystem ;

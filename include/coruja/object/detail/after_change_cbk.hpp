@@ -6,6 +6,10 @@
 
 #pragma once
 
+#include "coruja/support/type_traits.hpp"
+
+#include <utility>
+
 namespace coruja { namespace detail {
 
 template<typename From, typename Transform, typename F>    
@@ -23,5 +27,10 @@ struct after_change_cbk : protected Transform
 
     F _f;
 };
-        
+
+template<typename From, typename Transform, typename F>
+inline after_change_cbk<From, Transform, remove_reference_t<F>>
+make_after_change_cbk(Transform& transform, F&& f)
+{ return {transform, std::forward<F>(f)}; }
+
 }}

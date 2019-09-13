@@ -34,10 +34,18 @@ public:
     after_change_connection_t after_change(F&& f)
     {
         return _from.after_change
-            (detail::after_change_cbk<From, Transform, F>
-             {_transform, std::forward<F>(f)});
+            (detail::make_after_change_cbk<From>
+             (_transform, std::forward<F>(f)));
     }
             
+    template<typename F>
+    after_change_connection_t for_each(F&& f)
+    {
+        return _from.for_each
+            (detail::make_after_change_cbk<From>
+             (_transform, std::forward<F>(f)));
+    }
+    
     observed_t get() const noexcept
     { return _transform(_from.get()); }
     

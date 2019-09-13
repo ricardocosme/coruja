@@ -8,6 +8,7 @@
 
 #include "coruja/object/detail/and.hpp"
 #include "coruja/object/detail/connect_object.hpp"
+#include "coruja/object/detail/for_each_obj2conn.hpp"
 #include "coruja/object/detail/lift_to_observable.hpp"
 #include "coruja/object/detail/minus.hpp"
 #include "coruja/object/detail/plus.hpp"
@@ -45,19 +46,15 @@ public:
     template<typename F>
     after_change_connection_t after_change(F&& f)
     {
-        using conns_t = typename after_change_connection_t::type;
-        using Obj2Conn = boost::fusion::vector<From&, conns_t&>;
-
-        conns_t conns;
+        return detail::for_each_obj2conn<
+            typename after_change_connection_t::type>(
+                detail::connect_object
+                  <From,
+                   Transform,
+                   remove_reference_t<F>,
+                   after_change_connection_t>{_objects, _transform, f},
+                _objects);
         
-        auto obj2conn = boost::fusion::zip_view<Obj2Conn>(Obj2Conn(_objects, conns));
-        
-        boost::fusion::for_each
-            (obj2conn, detail::connect_object
-             <From, Transform, remove_reference_t<F>, after_change_connection_t>
-             {_objects, _transform, f});
-        
-        return {std::move(conns)};
     }
 
     //Experimental: Yep, we have code duplication here but this is a
@@ -65,19 +62,8 @@ public:
     template<typename F>
     after_change_connection_t for_each(F&& f)
     {
-        using conns_t = typename after_change_connection_t::type;
-        using Obj2Conn = boost::fusion::vector<From&, conns_t&>;
-
-        conns_t conns;
-        
-        auto obj2conn = boost::fusion::zip_view<Obj2Conn>(Obj2Conn(_objects, conns));
-        
-        boost::fusion::for_each
-            (obj2conn, detail::connect_object_for_each
-             <From, Transform, remove_reference_t<F>, after_change_connection_t>
-             {_objects, _transform, f});
-        
-        return {std::move(conns)};
+        f(boost::fusion::invoke(_transform, _objects));
+        return after_change(std::forward<F>(f));
     }
     
     observed_t get() const noexcept
