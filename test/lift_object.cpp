@@ -254,4 +254,14 @@ int main()
         BOOST_TEST(called);
         BOOST_TEST(o4 == "ABCDEF");
     }
+
+    //for_each
+    {
+        object<bool> o1{true};
+        object<bool> o2{true};
+        auto o1ANDo2 = o1 && o2;
+        int n{0};
+        o1ANDo2.for_each([&n](bool v){ ++n; });
+        BOOST_TEST(n == 1);
+    }
 }
