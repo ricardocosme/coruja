@@ -42,8 +42,8 @@ class connection
 public:
     connection() = default;
     
-    explicit connection(std::weak_ptr<Slots> slots, typename Slots::iterator it)
-        : _slots(slots)
+    explicit connection(std::weak_ptr<Slots> pslots, typename Slots::iterator it)
+        : _slots(pslots)
         , _it(it)
     {}
 
