@@ -31,6 +31,11 @@ public:
     const Connection& connection() noexcept
     { return _conn; }
 };
-    
+  
+template<typename Connection>
+inline scoped_blocked_connection<Connection> 
+make_scoped_blocked_connection(Connection c, bool initially_blocked = true)
+{ return {c, initially_blocked}; }
+
 }
 
