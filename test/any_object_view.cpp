@@ -8,6 +8,7 @@
 #include <coruja/object/lift.hpp>
 #include <coruja/object/object.hpp>
 #include <coruja/object/object_io.hpp>
+#include <coruja/object/transform.hpp>
 
 #include <boost/core/lightweight_test.hpp>
 #include <sstream>
@@ -30,10 +31,45 @@ int main()
         any_object_t o;
     }
 
-    //any_object_view(lv)
+    //any_object_view(lv = object)
     {
         object_t o(1);
         any_object_t any(o);
+        BOOST_TEST(any == 1);
+        bool called{false};
+        any.after_change
+            ([&called](int i)
+             {
+                 called = true;
+                 BOOST_TEST(i == 5);
+             });
+        o = 5;
+        BOOST_TEST(called);
+        BOOST_TEST(any == 5);
+    }
+
+    //any_object_view(lv = transform)
+    {
+        object_t o(1);
+        auto transf = o | [](const object_t::value_type& v){ return v; };
+        any_object_t any(transf);
+        BOOST_TEST(any == 1);
+        bool called{false};
+        any.after_change
+            ([&called](int i)
+             {
+                 called = true;
+                 BOOST_TEST(i == 5);
+             });
+        o = 5;
+        BOOST_TEST(called);
+        BOOST_TEST(any == 5);
+    }
+
+    //any_object_view(rv = transform)
+    {
+        object_t o(1);
+        any_object_t any(o | [](const object_t::value_type& v){ return v; });
         BOOST_TEST(any == 1);
         bool called{false};
         any.after_change

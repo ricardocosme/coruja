@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "coruja/object/object_view.hpp"
+#include "coruja/support/signal/any_connection.hpp"
 #include "coruja/support/signal.hpp"
 #include "coruja/support/type_traits.hpp"
 
@@ -16,7 +18,7 @@
 namespace coruja { 
 
 template<typename T>
-class any_object_view
+class any_object_view : view_base
 {
     struct any_object_view_iface
     {
