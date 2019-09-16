@@ -17,9 +17,7 @@ namespace coruja {
 
 template<typename Derived, typename Base = void>
 class observer_class : public detail::base_or_empty<Base>
-{
-    using base = detail::base_or_empty<Base>;
-    
+{    
     std::unique_ptr<Derived*> _self;
     std::vector<scoped_any_connection>_conns;
     
@@ -34,27 +32,29 @@ class observer_class : public detail::base_or_empty<Base>
              typename Reaction>
     auto reaction_wrapper(Reaction&& reaction)
     CORUJA_DECLTYPE_AUTO_RETURN
-    ( Wrapper<Derived*,typename std::remove_reference<Reaction>::type, To>
+    ( Wrapper<Derived*,
+              typename std::remove_reference<Reaction>::type,
+              typename std::remove_reference<To>::type>
       {*(this->_self), std::forward<Reaction>(reaction)} )
     
     template<typename To, typename Reaction>
-    any_connection observe(To& to, Reaction&& reaction, detail::tag::after_change)
+    any_connection observe(To&& to, Reaction&& reaction, detail::tag::after_change)
     {
         return to.after_change
-            (reaction_wrapper<To, detail::after_change_cbk>
+            (reaction_wrapper<To, detail::wrap_after_change_cbk>
              (std::forward<Reaction>(reaction)));
     }
 
     template<typename To, typename Reaction>
-    any_connection observe(To& to, Reaction&& reaction, detail::tag::obj_for_each)
+    any_connection observe(To&& to, Reaction&& reaction, detail::tag::obj_for_each)
     {
         return to.for_each
-            (reaction_wrapper<To, detail::after_change_cbk>
+            (reaction_wrapper<To, detail::wrap_after_change_cbk>
              (std::forward<Reaction>(reaction)));
     }
     
     template<typename To, typename Reaction>
-    any_connection observe(To& to, Reaction&& reaction, detail::tag::after_insert)
+    any_connection observe(To&& to, Reaction&& reaction, detail::tag::after_insert)
     {
         return to.after_insert
             (reaction_wrapper<To, detail::range_cbk>
@@ -62,7 +62,7 @@ class observer_class : public detail::base_or_empty<Base>
     }
 
     template<typename To, typename Reaction>
-    any_connection observe(To& to, Reaction&& reaction, detail::tag::for_each)
+    any_connection observe(To&& to, Reaction&& reaction, detail::tag::for_each)
     {
         return to.for_each
             (reaction_wrapper<To, detail::range_cbk>
@@ -70,7 +70,7 @@ class observer_class : public detail::base_or_empty<Base>
     }
     
     template<typename To, typename Reaction>
-    any_connection observe(To& to, Reaction&& reaction, detail::tag::before_erase)
+    any_connection observe(To&& to, Reaction&& reaction, detail::tag::before_erase)
     {
         return to.before_erase
             (reaction_wrapper<To, detail::range_cbk>
@@ -78,7 +78,7 @@ class observer_class : public detail::base_or_empty<Base>
     }
 
     template<typename Action, typename To, typename Reaction>
-    any_connection observe_impl(To& to, Reaction&& reaction)
+    any_connection observe_impl(To&& to, Reaction&& reaction)
     {
         _conns.emplace_back
             (observe(to, std::forward<Reaction>(reaction), Action{}));
@@ -86,6 +86,7 @@ class observer_class : public detail::base_or_empty<Base>
     }
         
 public:
+    using base = detail::base_or_empty<Base>;
 
     observer_class()
         : base()
@@ -104,7 +105,7 @@ public:
     }
     
     template<typename To, typename Reaction>
-    any_connection observe(To& to, Reaction&& reaction)
+    any_connection observe(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::after_change>
             (to, std::forward<Reaction>(reaction));
@@ -114,28 +115,28 @@ public:
     //be renamed to `observe` when `object::after_change` is replaced
     //by `object::for_each`.
     template<typename To, typename Reaction>
-    any_connection observe_obj_for_each(To& to, Reaction&& reaction)
+    any_connection observe_obj_for_each(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::obj_for_each>
             (to, std::forward<Reaction>(reaction));
     }
     
     template<typename To, typename Reaction>
-    any_connection observe_for_each(To& to, Reaction&& reaction)
+    any_connection observe_for_each(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::for_each>
             (to, std::forward<Reaction>(reaction));
     }
     
     template<typename To, typename Reaction>
-    any_connection observe_before_erase(To& to, Reaction&& reaction)
+    any_connection observe_before_erase(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::before_erase>
             (to, std::forward<Reaction>(reaction));
     }
     
     template<typename To, typename Reaction>
-    any_connection observe_after_insert(To& to, Reaction&& reaction)
+    any_connection observe_after_insert(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::after_insert>
             (to, std::forward<Reaction>(reaction));
