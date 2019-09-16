@@ -49,28 +49,4 @@ struct connect_object
     F& _f;
 };
 
-template<typename From, typename Transform, typename F, typename Conn>
-struct connect_object_for_each
-{
-    template<typename Obj2Conn>
-    void operator()(Obj2Conn&& obj2conn) const
-    {
-        using namespace boost::fusion;
-        auto& object = at_c<0>(obj2conn);
-        auto& conn = at_c<1>(obj2conn);
-
-        using Obj = typename std::remove_reference<
-            typename result_of::at_c<Obj2Conn, 0>::type>::type;
-        
-        //TODO: Update from
-        conn = object.for_each
-            (lift_f<From, Transform, F, typename Obj::observed_t>
-             (_transform, _from, _f));
-    }
-    
-    From& _from;
-    Transform& _transform;
-    F& _f;
-};
-
 }}
