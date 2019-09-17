@@ -26,6 +26,7 @@ public:
     using value_type = observed_t;
     using after_change_connection_t =
         typename ObservableObject::after_change_connection_t;
+    using signal_id_t = typename ObservableObject::signal_id_t;
     
     object() = default;
     
@@ -45,6 +46,14 @@ public:
     template<typename F>
     after_change_connection_t for_each(F&& f)
     { return _obj->for_each(std::forward<F>(f)); }
+    
+    //Experimental
+    signal_id_t after_change_id() const noexcept
+    { return _obj->after_change_id(); }
+
+    //Experimental
+    signal_id_t for_each_id() const noexcept
+    { return _obj->for_each_id(); }
 };
         
 template<typename T>

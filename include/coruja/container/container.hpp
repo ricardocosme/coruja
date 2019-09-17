@@ -213,6 +213,14 @@ public:
             (detail::wrapper_for_each_value<F, detail::fwd_by_ref<F&>>{std::forward<F>(f)});
     }
 
+    //Experimental
+    signal_id_t for_each_id() const noexcept
+    { return _after_insert.id(); }
+    
+    //Experimental
+    signal_id_t before_erase_id() const noexcept
+    { return _before_erase.id(); }
+    
     friend bool operator==(const Derived& lhs, const Derived& rhs)
     { return lhs.observed() == rhs.observed(); }
 

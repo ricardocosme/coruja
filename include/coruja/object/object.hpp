@@ -42,6 +42,7 @@ public:
     using observed_t = typename base::observed_t;
     using value_type = observed_t;
     using after_change_connection_t = typename base::after_change_connection_t;
+    using signal_id_t = typename base::signal_id_t;
 
     object() = default;
     
