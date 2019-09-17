@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "coruja/object/object_view.hpp"
 #include "coruja/support/macro.hpp"
 #include "coruja/support/type_traits.hpp"
 
@@ -34,9 +35,9 @@ template<typename T>
 using self_element_type = typename std::remove_pointer<T>::type;
         
 template<typename Self, typename Reaction, typename To>
-struct after_change_cbk : private Reaction
+struct wrap_after_change_cbk : private Reaction
 {
-    after_change_cbk(Self& self, Reaction reaction)
+    wrap_after_change_cbk(Self& self, Reaction reaction)
         : Reaction(std::move(reaction))
         , _self(self)
     {}
@@ -84,6 +85,14 @@ struct after_change_cbk : private Reaction
 };
 
 template<typename Self, typename Reaction, typename To>
+struct wrap_after_change_cbk<Self, Reaction, object_view<To>> :
+        wrap_after_change_cbk<Self, Reaction, To>
+{
+    using base = wrap_after_change_cbk<Self, Reaction, To>;
+    using base::base;
+};
+
+template<typename Self, typename Reaction, typename>
 struct range_cbk : private Reaction
 {
     range_cbk(Self& self, Reaction reaction)
@@ -91,8 +100,24 @@ struct range_cbk : private Reaction
         , _self(self)
     {}
 
-    void operator()(To& o, typename To::iterator it) const
+    template<typename To_>
+    typename std::enable_if<
+        boost::hof::is_invocable<Reaction,
+                                 self_element_type<Self>&,
+                                 To_&,
+                                 typename To_::iterator>::value
+    >::type
+    operator()(To_& o, typename To_::iterator it) const
     { Reaction::operator()(*_self, o, it); }
+
+    template<typename V>
+    typename std::enable_if<
+        boost::hof::is_invocable<Reaction,
+                                  self_element_type<Self>&,
+                                  V&>::value
+    >::type
+    operator()(V& e) const
+    { Reaction::operator()(*_self, e); }
     
     Self& _self;
 };
