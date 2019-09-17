@@ -19,6 +19,7 @@ template<typename From, typename Transform>
 class transform_object : view_base
 {
 public:    
+    using signal_id_t = typename From::signal_id_t;
     using observed_t = result_of_t<Transform(detail::observed_t<From>)>;
     using value_type = observed_t;
     using after_change_connection_t = typename From::after_change_connection_t;
@@ -51,6 +52,14 @@ public:
     
     observed_t observed() const noexcept
     { return get(); }
+    
+    //Experimental
+    signal_id_t after_change_id() const noexcept
+    { return _from.after_change_id(); }
+    
+    //Experimental
+    signal_id_t for_each_id() const noexcept
+    { return _from.for_each_id(); }
     
 private:
     
