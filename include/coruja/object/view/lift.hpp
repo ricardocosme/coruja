@@ -28,6 +28,7 @@ class lift_object : view_base
     
 public:
     
+    using signal_id_t = lift_signal_id_t;
     using observed_t = T;
     using value_type = observed_t;
     using after_change_connection_t = connections<
@@ -68,6 +69,17 @@ public:
 
     observed_t observed() const noexcept
     { return get(); }
+    
+    signal_id_t after_change_id() const noexcept
+    {
+        std::vector<void*> ids;
+        ids.reserve(boost::fusion::size(_objects));
+        boost::fusion::for_each(_objects, detail::build_lift_signal_id_t{ids});
+        return signal_id_t{std::move(ids)};
+    }
+
+    signal_id_t for_each_id() const noexcept
+    { return after_change_id(); }
     
 private:
 

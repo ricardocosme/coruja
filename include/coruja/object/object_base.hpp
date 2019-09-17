@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "coruja/support/signal/signal_id_t.hpp"
+
 #include <boost/hof/is_invocable.hpp>
 
 namespace coruja {
@@ -33,6 +35,7 @@ public:
 
     using observed_t = Observed;
     using after_change_connection_t = typename after_change_t::connection_t;
+    using signal_id_t = ::coruja::signal_id_t;
     
     template<typename F>
     enable_if_is_invocable_t<after_change_connection_t, F, Derived&>
@@ -62,6 +65,14 @@ public:
         detail::lift_to_observable_impl<F&>{f}(as_derived());
         return after_change(std::forward<F>(f));
     }
+
+    //Experimental
+    signal_id_t after_change_id() const noexcept
+    { return _after_change.id(); }
+
+    //Experimental
+    signal_id_t for_each_id() const noexcept
+    { return _after_change.id(); }
 };
     
 }
