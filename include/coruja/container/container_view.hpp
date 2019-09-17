@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "coruja/support/signal/signal_id_t.hpp"
 #include "coruja/support/type_traits.hpp"
 
 #include <range/v3/range_traits.hpp>
@@ -52,6 +53,14 @@ public:
     template<typename F>
     before_erase_connection_t before_erase(F&& f)
     { return _rng->before_erase(std::forward<F>(f)); }
+    
+    //Experimental
+    signal_id_t for_each_id() const noexcept
+    { return _rng->for_each_id(); }
+    
+    //Experimental
+    signal_id_t before_erase_id() const noexcept
+    { return _rng->before_erase_id(); }
 };
 
 template<typename ObservableErasableRange>

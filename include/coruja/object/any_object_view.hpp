@@ -9,6 +9,7 @@
 #include "coruja/object/object_view.hpp"
 #include "coruja/support/signal/any_connection.hpp"
 #include "coruja/support/signal.hpp"
+#include "coruja/support/signal/any_signal_id_t.hpp"
 #include "coruja/support/type_traits.hpp"
 
 #include <functional>
@@ -28,6 +29,8 @@ class any_object_view : view_base
         virtual T observed() const noexcept = 0;
         virtual any_connection after_change(std::function<void(const T&)>) = 0;
         virtual any_connection for_each(std::function<void(const T&)>) = 0;
+        virtual any_signal_id_t after_change_id() const noexcept = 0;
+        virtual any_signal_id_t for_each_id() const noexcept = 0;
     };
 
     template<typename ObservableObject>
@@ -55,6 +58,12 @@ class any_object_view : view_base
         any_connection for_each(std::function<void(const T&)> f) override
         { return _obj.for_each(std::move(f)); }
         
+        any_signal_id_t after_change_id() const noexcept override
+        { return _obj.after_change_id(); }
+        
+        any_signal_id_t for_each_id() const noexcept override
+        { return _obj.for_each_id(); }
+        
         ObservableObject _obj;
     };
     
@@ -65,6 +74,7 @@ public:
     using observed_t = T;
     using value_type = observed_t;
     using after_change_connection_t = any_connection;
+    using signal_id_t = ::coruja::any_signal_id_t;
     
     any_object_view() = default;
     
@@ -106,6 +116,14 @@ public:
     template<typename F>
     after_change_connection_t for_each(F&& f)
     { return _model->for_each(std::forward<F>(f)); }
+
+    //Experimental
+    signal_id_t after_change_id() const noexcept
+    { return _model->after_change_id(); }
+
+    //Experimental
+    signal_id_t for_each_id() const noexcept
+    { return _model->for_each_id(); }
 };
         
 }

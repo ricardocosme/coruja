@@ -8,6 +8,7 @@
 
 #include "coruja/support/signal/connection.hpp"
 #include "coruja/support/signal/scoped_connection.hpp"
+#include "coruja/support/signal/signal_id_t.hpp"
 
 #include <functional>
 #include <list>
@@ -79,6 +80,9 @@ public:
             if(!it->first && it->second) it->second(std::forward<PArgs>(args)...);
         }
     }
+
+    signal_id_t id() const noexcept
+    { return signal_id_t(_slots.get()); }
 };
  
 }
