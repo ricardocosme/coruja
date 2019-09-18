@@ -12,7 +12,7 @@
 
 #include <algorithm>
 
-namespace coruja { namespace detail {
+namespace coruja { namespace view { namespace detail {
 
 struct push_back
 {
@@ -39,5 +39,5 @@ struct build_lift_signal_id_t
     std::vector<void*>& ids;
 };
 
-}}
+}}}
 
