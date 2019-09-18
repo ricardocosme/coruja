@@ -6,7 +6,7 @@
 
 #include <coruja/object/object.hpp>
 #include <coruja/object/object_io.hpp>
-#include <coruja/object/transform.hpp>
+#include <coruja/object/view/transform.hpp>
 
 #include <boost/core/lightweight_test.hpp>
 
@@ -14,8 +14,9 @@
 #include <string>
 
 using namespace coruja;
+using namespace coruja::view;
 
-using object_t = object<std::string>;
+using object_t = coruja::object<std::string>;
 
 struct append_exclamation {
     std::string operator()(const std::string& s)

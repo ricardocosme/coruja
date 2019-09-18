@@ -6,7 +6,7 @@
 
 #include <coruja/object/object.hpp>
 #include <coruja/object/for_each.hpp>
-#include <coruja/object/transform.hpp>
+#include <coruja/object/view/transform.hpp>
 
 #include <boost/core/lightweight_test.hpp>
 #include <string>
@@ -56,7 +56,7 @@ int main() {
         bool b1{false}, b2{false};
         for_each(F{b1, b2},
                  o1,
-                 transform(o1, [](bool v) -> std::string
+                 view::transform(o1, [](bool v) -> std::string
                           {return v ? "true" : "false";}));
         BOOST_TEST(b1);
         BOOST_TEST(b2);

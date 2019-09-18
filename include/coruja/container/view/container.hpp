@@ -12,10 +12,10 @@
 
 #include <utility>
 
-namespace coruja { 
+namespace coruja { namespace view {
 
 template<typename ObservableErasableRange>
-class container_view : ranges::view_base
+class container : ranges::view_base
 {
     using Rng = ObservableErasableRange;
     Rng* _rng{nullptr};
@@ -26,9 +26,9 @@ public:
     using for_each_connection_t = typename Rng::for_each_connection_t;
     using before_erase_connection_t = typename Rng::before_erase_connection_t;
 
-    container_view() = default;
+    container() = default;
     
-    container_view(Rng& o) : _rng(&o) {}
+    container(Rng& o) : _rng(&o) {}
 
     ranges::range_iterator_t<Rng> begin() const noexcept
     { return _rng->begin(); }
@@ -61,7 +61,7 @@ enable_if_t<
      ranges::view_base, ObservableErasableRange>::value)
     &&
     is_observable_erasable_range<ObservableErasableRange>::value,
-    container_view<ObservableErasableRange>
+    container<ObservableErasableRange>
 >
 view(ObservableErasableRange& rng)
 { return {rng}; }
@@ -76,4 +76,4 @@ enable_if_t<
 view(ObservableErasableRange&& rng)
 { return std::forward<ObservableErasableRange>(rng); }
     
-}
+}}

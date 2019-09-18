@@ -7,13 +7,13 @@
 #pragma once
 
 #include "coruja/object/object.hpp"
-#include "coruja/object/object_view.hpp"
-#include "coruja/object/detail/after_change_cbk.hpp"
-#include "coruja/object/detail/transform_aux.hpp"
+#include "coruja/object/view/object.hpp"
+#include "coruja/object/view/detail/after_change_cbk.hpp"
+#include "coruja/object/view/detail/transform_aux.hpp"
 
 #include <range/v3/utility/semiregular.hpp>
 
-namespace coruja { 
+namespace coruja { namespace view {
     
 template<typename From, typename Transform>
 class transform_object : view_base
@@ -65,11 +65,12 @@ inline enable_if_t<
 transform(ObservableObject&& o, F&& f)
 { return {view(std::forward<ObservableObject>(o)), std::forward<F>(f)}; }
 
+}}
+
 template<typename ObservableObject, typename F>
-inline enable_if_t<
-    is_observable_object<ObservableObject>::value,
-    detail::transform_object_t<ObservableObject, F>>
+inline coruja::enable_if_t<
+    coruja::is_observable_object<ObservableObject>::value,
+    coruja::view::detail::transform_object_t<ObservableObject, F>>
 operator|(ObservableObject&& o, F&& f)
-{ return transform(std::forward<ObservableObject>(o), std::forward<F>(f)); }
+{ return coruja::view::transform(std::forward<ObservableObject>(o), std::forward<F>(f)); }
     
-}

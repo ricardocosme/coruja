@@ -11,12 +11,12 @@
 #include <type_traits>
 #include <utility>
 
-namespace coruja { 
+namespace coruja { namespace view {
 
 struct view_base {};
     
 template<typename ObservableObject>
-class object_view : view_base
+class object : view_base
 {
     ObservableObject* _obj{nullptr};
     
@@ -27,9 +27,9 @@ public:
     using after_change_connection_t =
         typename ObservableObject::after_change_connection_t;
     
-    object_view() = default;
+    object() = default;
     
-    object_view(ObservableObject& o) : _obj(&o) {}
+    object(ObservableObject& o) : _obj(&o) {}
 
     observed_t get() const noexcept
     { return _obj->observed(); }
@@ -48,15 +48,15 @@ public:
 };
         
 template<typename T>
-using is_object_view = std::is_base_of<view_base, T>;
+using is_view = std::is_base_of<view_base, T>;
 
 template<typename ObservableObject>
 inline
 enable_if_t<
     is_observable_object<ObservableObject>::value
     &&
-    !is_object_view<ObservableObject>::value,
-    object_view<ObservableObject>
+    !is_view<ObservableObject>::value,
+    object<ObservableObject>
 >
 view(ObservableObject& rng)
 { return {rng}; }
@@ -64,10 +64,10 @@ view(ObservableObject& rng)
 template<typename ObservableObject>
 inline
 enable_if_t<
-    is_object_view<remove_reference_t<ObservableObject>>::value,
+    is_view<remove_reference_t<ObservableObject>>::value,
     remove_reference_t<ObservableObject>
 >
 view(ObservableObject&& rng)
 { return std::forward<ObservableObject>(rng); }
 
-}
+}}

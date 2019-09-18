@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "coruja/object/object_view.hpp"
+#include "coruja/object/view/object.hpp"
 #include "coruja/support/signal/any_connection.hpp"
 #include "coruja/support/signal.hpp"
 #include "coruja/support/type_traits.hpp"
@@ -15,15 +15,15 @@
 #include <memory>
 #include <utility>
 
-namespace coruja { 
+namespace coruja { namespace view {
 
 template<typename T>
-class any_object_view : view_base
+class any_object : view_base
 {
-    struct any_object_view_iface
+    struct any_object_iface
     {
-        virtual ~any_object_view_iface() = default;
-        virtual any_object_view_iface* clone() const = 0;
+        virtual ~any_object_iface() = default;
+        virtual any_object_iface* clone() const = 0;
         virtual T get() const noexcept = 0;
         virtual T observed() const noexcept = 0;
         virtual any_connection after_change(std::function<void(const T&)>) = 0;
@@ -31,7 +31,7 @@ class any_object_view : view_base
     };
 
     template<typename ObservableObject>
-    struct model_t : any_object_view_iface
+    struct model_t : any_object_iface
     {
         model_t() = default;
         
@@ -40,7 +40,7 @@ class any_object_view : view_base
         
         virtual ~model_t() = default;
         
-        any_object_view_iface* clone() const override
+        any_object_iface* clone() const override
         { return new model_t(_obj); }
         
         T get() const noexcept override
@@ -58,7 +58,7 @@ class any_object_view : view_base
         ObservableObject _obj;
     };
     
-    std::unique_ptr<any_object_view_iface> _model;
+    std::unique_ptr<any_object_iface> _model;
     
 public:
     
@@ -66,31 +66,31 @@ public:
     using value_type = observed_t;
     using after_change_connection_t = any_connection;
     
-    any_object_view() = default;
+    any_object() = default;
     
     template<typename ObservableObject,
              typename Enable = enable_if_t<
                  !std::is_same<
                      typename std::decay<ObservableObject>::type,
-                     any_object_view>::value
+                     any_object>::value
                  >>
-    any_object_view(ObservableObject&& o)
+    any_object(ObservableObject&& o)
         : _model(new model_t<ObservableObject>
                  (std::forward<ObservableObject>(o)))
     {}
 
-    any_object_view(const any_object_view& rhs)
+    any_object(const any_object& rhs)
         : _model(rhs._model ? rhs._model->clone() : nullptr)
     {}
     
-    any_object_view& operator=(const any_object_view& rhs)
+    any_object& operator=(const any_object& rhs)
     {
         _model.reset(rhs._model ? rhs._model->clone() : nullptr);
         return *this;
     }
     
-    any_object_view(any_object_view&& rhs) = default;
-    any_object_view& operator=(any_object_view&&) = default;
+    any_object(any_object&& rhs) = default;
+    any_object& operator=(any_object&&) = default;
 
     T get() const noexcept
     { return _model->get(); }
@@ -108,4 +108,4 @@ public:
     { return _model->for_each(std::forward<F>(f)); }
 };
         
-}
+}}

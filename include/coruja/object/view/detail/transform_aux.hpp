@@ -8,7 +8,7 @@
 
 #pragma once
 
-namespace coruja {
+namespace coruja { namespace view {
 
 template<typename From, typename Transform>
 class transform_object;
@@ -25,4 +25,4 @@ template<typename O1, typename F>
 using transform_object_t = transform_object<
     view<O1>, remove_reference_t<F>>;
     
-}}
+}}}

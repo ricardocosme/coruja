@@ -10,7 +10,7 @@
 
 #include <utility>
 
-namespace coruja { namespace detail {
+namespace coruja { namespace view { namespace detail {
 
 template<typename From, typename Transform, typename F>    
 struct after_change_cbk : protected Transform
@@ -33,4 +33,4 @@ inline after_change_cbk<From, Transform, remove_reference_t<F>>
 make_after_change_cbk(Transform& transform, F&& f)
 { return {transform, std::forward<F>(f)}; }
 
-}}
+}}}

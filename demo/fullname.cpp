@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
-#include <coruja/object/lift.hpp>
+#include <coruja/object/view/lift.hpp>
 #include <coruja/object/object.hpp>
 
 #include <iostream>

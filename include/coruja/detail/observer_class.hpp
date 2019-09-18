@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "coruja/object/object_view.hpp"
+#include "coruja/object/view/object.hpp"
 #include "coruja/support/macro.hpp"
 #include "coruja/support/type_traits.hpp"
 
@@ -85,7 +85,7 @@ struct wrap_after_change_cbk : private Reaction
 };
 
 template<typename Self, typename Reaction, typename To>
-struct wrap_after_change_cbk<Self, Reaction, object_view<To>> :
+struct wrap_after_change_cbk<Self, Reaction, view::object<To>> :
         wrap_after_change_cbk<Self, Reaction, To>
 {
     using base = wrap_after_change_cbk<Self, Reaction, To>;
