@@ -26,7 +26,6 @@ using enable_if_is_not_invocable_t = typename std::enable_if<
     !boost::hof::is_invocable<F, Args...>::value,
     Ret>::type;
     
-    
 //For std < c++14
 template<typename T>
 using remove_reference_t = typename std::remove_reference<T>::type;
@@ -36,7 +35,6 @@ using enable_if_t = typename std::enable_if<v, T>::type;
 
 template<typename T>
 using result_of_t = typename std::result_of<T>::type;
-
     
 template<typename T, typename = void>
 struct is_observable : std::false_type {};
