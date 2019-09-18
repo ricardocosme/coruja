@@ -1,6 +1,6 @@
 #include "check_equal.hpp"
 
-#include <coruja/container/transform.hpp>
+#include <coruja/container/view/transform.hpp>
 #include <coruja/container/vector.hpp>
 
 #include <boost/optional/optional.hpp>
@@ -62,7 +62,7 @@ int main()
 {
     {
         svector s;
-        auto t = transform(s, [](std::string& s){ return s; });
+        auto t = view::transform(s, [](std::string& s){ return s; });
         using tsvector = decltype(t);
         static_assert(std::is_same<tsvector::observed_t,
                       svector::observed_t>::value, "");
@@ -78,45 +78,45 @@ int main()
     //default ctor
     {
         svector s;
-        auto t = transform(s, [](std::string& s){ return s; });
+        auto t = view::transform(s, [](std::string& s){ return s; });
         using tsvector = decltype(t);
         tsvector def;
     }
 
-    //transform(lv, rv) rv is const
+    //view::transform(lv, rv) rv is const
     {
         svector s{"hello"};
-        auto t = transform(s, [](std::string& s){ return s + "!"; });
+        auto t = view::transform(s, [](std::string& s){ return s + "!"; });
         run(s, t, "!");
     }
 
-    //transform(lv, rv) rv is non const
+    //view::transform(lv, rv) rv is non const
     {
         svector s{"hello"};
-        auto t = transform(s, append_exclamation{});
+        auto t = view::transform(s, append_exclamation{});
         run(s, t, "!");
     }
     
-    //transform(lv, lv)
+    //view::transform(lv, lv)
     {
         svector s{"hello"};
         append_exclamation f{};
-        auto t = transform(s, f);
+        auto t = view::transform(s, f);
         run(s, t, "!");
     }
     
-    //vector | transform | transform (using lv)
+    //vector | view::transform | view::transform (using lv)
     {
         svector s{"hello"};
-        auto t0 = transform(s, append_space{});
-        auto t1 = transform(t0, append_exclamation{});
+        auto t0 = view::transform(s, append_space{});
+        auto t1 = view::transform(t0, append_exclamation{});
         run(s, t1, " !");
     }
     
-    //vector | transform | transform (using rv)
+    //vector | view::transform | view::transform (using rv)
     {
         svector s{"hello"};
-        auto t = transform(transform(s, append_space{}),
+        auto t = view::transform(view::transform(s, append_space{}),
                            append_exclamation{});
         run(s, t, " !");
     }
@@ -124,14 +124,14 @@ int main()
     //observed()
     {
         svector s{"hello"};
-        auto t = transform(s, append_exclamation{});
+        auto t = view::transform(s, append_exclamation{});
         BOOST_TEST(t.observed().front() == "hello");
     }
     
     //copy ctor
     {
         svector s{"hello"};
-        auto t = transform(s, append_exclamation{});
+        auto t = view::transform(s, append_exclamation{});
         auto ct = t;
         run(s, ct, "!");
     }
@@ -139,7 +139,7 @@ int main()
     //copy assignment operator
     {
         svector s{"hello"};
-        auto t = transform(s, append_exclamation{});
+        auto t = view::transform(s, append_exclamation{});
         decltype(t) ct;
         ct = t;
         run(s, ct, "!");
@@ -148,7 +148,7 @@ int main()
     //move ctor
     {
         svector s{"hello"};
-        auto t = transform(s, append_exclamation{});
+        auto t = view::transform(s, append_exclamation{});
         auto ct = std::move(t);
         run(s, ct, "!");
     }
@@ -156,7 +156,7 @@ int main()
     //move assignment operator
     {
         svector s{"hello"};
-        auto t = transform(s, append_exclamation{});
+        auto t = view::transform(s, append_exclamation{});
         decltype(t) ct;
         ct = std::move(t);
         run(s, ct, "!");

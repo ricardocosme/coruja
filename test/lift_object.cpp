@@ -6,8 +6,8 @@
 
 #include <coruja/object/object.hpp>
 #include <coruja/object/object_io.hpp>
-#include <coruja/object/transform.hpp>
-#include <coruja/object/lift.hpp>
+#include <coruja/object/view/transform.hpp>
+#include <coruja/object/view/lift.hpp>
 
 #include <boost/core/lightweight_test.hpp>
 
@@ -15,8 +15,9 @@
 #include <string>
 
 using namespace coruja;
+using namespace coruja::view;
 
-using object_t = object<bool>;
+using object_t = coruja::object<bool>;
 
 struct concat {
     std::string operator()(const std::string& s1,
@@ -39,8 +40,8 @@ int main()
     
     //lift(rv, lv...) rs is const
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         auto o3 = lift([](const std::string& s1, const std::string& s2)
                        { return s1 + s2; }, o1, o2);
         bool called{false};
@@ -57,8 +58,8 @@ int main()
     
     //lift(rv, lv...) rs is non const
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         auto o3 = lift(concat{}, o1, o2);
         bool called{false};
         o3.after_change([&called](std::string s)
@@ -74,8 +75,8 @@ int main()
     
     //lift(lv, lv...)
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         concat f{};
         auto o3 = lift(f, o1, o2);
         bool called{false};
@@ -92,8 +93,8 @@ int main()
     
     //lift(lv, lv, rv)
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         concat f{};
         auto o3 = lift(f, o1, transform(o2, [](std::string s){ return s + "!"; }));
         bool called{false};
@@ -108,7 +109,7 @@ int main()
         BOOST_TEST(o3 == "ABCDEF!");
     }
     
-    //object<bool> && object<bool>
+    //coruja::object<bool> && coruja::object<bool>
     {
         object_t o1{true};
         object_t o2{false};
@@ -125,7 +126,7 @@ int main()
         BOOST_TEST(o3 == false);
     }
  
-    //object<bool> && lift_object
+    //coruja::object<bool> && lift_object
     {
         object_t o1{true};
         object_t o2{true};
@@ -144,10 +145,10 @@ int main()
         BOOST_TEST(o5 == false);
     }
 
-    //object<string> + object<string>
+    //coruja::object<string> + coruja::object<string>
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         auto o3 = o1 + o2;
         bool called{false};
         o3.after_change([&called](std::string s)
@@ -161,10 +162,10 @@ int main()
         BOOST_TEST(o3 == "ABCDEF");
     }
             
-    //object<float> - object<float>
+    //coruja::object<float> - coruja::object<float>
     {
-        object<int> o1{10};
-        object<int> o2{2};
+        coruja::object<int> o1{10};
+        coruja::object<int> o2{2};
         auto o3 = o1 - o2;
         bool called{false};
         o3.after_change([&called](int s)
@@ -183,8 +184,8 @@ int main()
     
     //copy ctor
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         auto o3 = o1 + o2;
         bool called{false};
         o3.after_change([&called](std::string s)
@@ -201,8 +202,8 @@ int main()
     
     //copy assignment operator
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         auto o3 = o1 + o2;
         bool called{false};
         o3.after_change([&called](std::string s)
@@ -220,8 +221,8 @@ int main()
     
     //move ctor
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         auto o3 = o1 + o2;
         bool called{false};
         o3.after_change([&called](std::string s)
@@ -238,8 +239,8 @@ int main()
     
     //move assignment operator
     {
-        object<std::string> o1{"abc"};
-        object<std::string> o2{"def"};
+        coruja::object<std::string> o1{"abc"};
+        coruja::object<std::string> o2{"def"};
         auto o3 = o1 + o2;
         bool called{false};
         o3.after_change([&called](std::string s)
@@ -257,8 +258,8 @@ int main()
 
     //for_each
     {
-        object<bool> o1{true};
-        object<bool> o2{true};
+        coruja::object<bool> o1{true};
+        coruja::object<bool> o2{true};
         auto o1ANDo2 = o1 && o2;
         int n{0};
         o1ANDo2.for_each([&n](bool v){ ++n; });

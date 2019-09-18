@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
-#include <coruja/container/transform.hpp>
+#include <coruja/container/view/transform.hpp>
 #include <coruja/container/vector.hpp>
 
 #include <iostream>
@@ -18,7 +18,7 @@ int main()
 {    
     vector<person_t> persons;
     
-    auto fullnames = transform
+    auto fullnames = view::transform
         (persons, [](auto& person){return person.first_name + person.surname;});
     
     using namespace std;

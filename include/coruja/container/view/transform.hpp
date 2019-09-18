@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "coruja/container/container_view.hpp"
+#include "coruja/container/view/container.hpp"
 #include "coruja/support/type_traits.hpp"
 
 #include <boost/hof/is_invocable.hpp>
@@ -157,7 +157,7 @@ public:
     { return _rng.before_erase(invoke_observer_by_ref(std::forward<F>(f))); }
 };
 
-namespace coruja {
+namespace coruja { namespace view {
 
 template<typename ObservableErasableRange, typename F>
 inline enable_if_t<
@@ -169,4 +169,4 @@ inline enable_if_t<
 transform(ObservableErasableRange&& rng, F&& f)
 { return {view(rng), std::forward<F>(f)}; }
     
-}
+}}

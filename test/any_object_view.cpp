@@ -4,18 +4,18 @@
 // (See accompanying file LICENSE or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
-#include <coruja/object/any_object_view.hpp>
-#include <coruja/object/lift.hpp>
 #include <coruja/object/object.hpp>
 #include <coruja/object/object_io.hpp>
-#include <coruja/object/transform.hpp>
+#include <coruja/object/view/any_object.hpp>
+#include <coruja/object/view/lift.hpp>
+#include <coruja/object/view/transform.hpp>
 
 #include <boost/core/lightweight_test.hpp>
 #include <sstream>
 
 using namespace coruja;
 
-using any_object_t = any_object_view<int>;
+using any_object_t = view::any_object<int>;
 using object_t = object<int>;
 
 int main()
@@ -31,7 +31,7 @@ int main()
         any_object_t o;
     }
 
-    //any_object_view(lv = object)
+    //any_object(lv = object)
     {
         object_t o(1);
         any_object_t any(o);
@@ -48,7 +48,7 @@ int main()
         BOOST_TEST(any == 5);
     }
 
-    //any_object_view(lv = transform)
+    //any_object(lv = transform)
     {
         object_t o(1);
         auto transf = o | [](const object_t::value_type& v){ return v; };
@@ -66,7 +66,7 @@ int main()
         BOOST_TEST(any == 5);
     }
 
-    //any_object_view(rv = transform)
+    //any_object(rv = transform)
     {
         object_t o(1);
         any_object_t any(o | [](const object_t::value_type& v){ return v; });
@@ -83,7 +83,7 @@ int main()
         BOOST_TEST(any == 5);
     }
     
-    //any_object_view(rv)
+    //any_object(rv)
     {
         object_t o1, o2;
         o1 = 0;
@@ -113,7 +113,7 @@ int main()
         BOOST_TEST(any.observed() == any.get());
     }
 
-    //any_object_view(any_object_view&&)
+    //any_object(any_object&&)
     {
         object_t o;
         any_object_t any(o);
@@ -129,7 +129,7 @@ int main()
         BOOST_TEST(called);
     }
     
-    //any_object_view& operator=(any_object_view&&)
+    //any_object& operator=(any_object&&)
     {
         object_t o;
         any_object_t any(o);
@@ -146,7 +146,7 @@ int main()
         BOOST_TEST(called);
     }
     
-    //any_object_view(const any_object_view&)
+    //any_object(const any_object&)
     {
         object_t o;
         any_object_t any(o);
@@ -164,7 +164,7 @@ int main()
         BOOST_TEST(called);
     }
     
-    //any_object_view& operator=(const any_object_view&)
+    //any_object& operator=(const any_object&)
     {
         object_t o;
         any_object_t any(o);
@@ -187,8 +187,8 @@ int main()
     {
         object<std::string> _ov{"ola"};
         object<std::string> _ov2{"ola"};
-        any_object_view<std::string> ov = _ov;
-        any_object_view<std::string> ov2 = _ov2;
+        view::any_object<std::string> ov = _ov;
+        view::any_object<std::string> ov2 = _ov2;
         BOOST_TEST(ov == ov2);
         _ov2 = "change";
         BOOST_TEST(ov != ov2);
@@ -199,8 +199,8 @@ int main()
 
         object<char> _o1{5};
         object<int> _o2{5};
-        any_object_view<char> o1 = _o1;
-        any_object_view<int> o2 = _o2;
+        view::any_object<char> o1 = _o1;
+        view::any_object<int> o2 = _o2;
         //Object<T1> == Object<T2>
         BOOST_TEST(o2 == o1);
         BOOST_TEST(o1 == o2);
@@ -214,8 +214,8 @@ int main()
     {
         object<char> _o1{0};
         object<int> _o2{1};
-        any_object_view<char> o1 = _o1;
-        any_object_view<int> o2 = _o2;
+        view::any_object<char> o1 = _o1;
+        view::any_object<int> o2 = _o2;
         //Object<T1> vs ObJect<T2>
         BOOST_TEST(o1 < o2);
         BOOST_TEST(o2 > o1);
@@ -236,7 +236,7 @@ int main()
     //operator<<
     {
         object<std::string> o("abc");
-        any_object_view<std::string> any(o);
+        view::any_object<std::string> any(o);
         std::ostringstream os;
         os << any;
         BOOST_TEST(os.str() == any);

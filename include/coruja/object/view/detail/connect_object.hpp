@@ -8,7 +8,7 @@
 
 #include <boost/fusion/functional/invocation/invoke.hpp>
 
-namespace coruja { namespace detail {
+namespace coruja { namespace view { namespace detail {
 
 template<typename Objects, typename Transform, typename F, typename Observed>
 struct lift_f : private Transform {
@@ -49,4 +49,4 @@ struct connect_object
     F& _f;
 };
 
-}}
+}}}
