@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <coruja/support/type_traits.hpp>
+
+#include <type_traits>
 #include <utility>
 
 namespace coruja { 
@@ -44,11 +47,15 @@ public:
     { return _obj->for_each(std::forward<F>(f)); }
 };
         
+template<typename T>
+using is_object_view = std::is_base_of<view_base, T>;
+
 template<typename ObservableObject>
 inline
 enable_if_t<
-    !std::is_base_of<
-        view_base, ObservableObject>::value,    
+    is_observable_object<ObservableObject>::value
+    &&
+    !is_object_view<ObservableObject>::value,
     object_view<ObservableObject>
 >
 view(ObservableObject& rng)
@@ -57,8 +64,7 @@ view(ObservableObject& rng)
 template<typename ObservableObject>
 inline
 enable_if_t<
-    std::is_base_of<
-        view_base, remove_reference_t<ObservableObject>>::value,
+    is_object_view<remove_reference_t<ObservableObject>>::value,
     remove_reference_t<ObservableObject>
 >
 view(ObservableObject&& rng)
