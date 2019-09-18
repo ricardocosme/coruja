@@ -9,6 +9,7 @@
 #include "coruja/object/view/lift.hpp"
 #include "coruja/object/detail/for_each_obj2conn.hpp"
 #include "coruja/object/detail/lift_to_observable.hpp"
+#include "coruja/object/view/detail/build_lift_signal_id_t.hpp"
 #include "coruja/object/view/detail/connect_object.hpp"
 #include "coruja/object/view/object.hpp"
 #include "coruja/support/connections.hpp"
