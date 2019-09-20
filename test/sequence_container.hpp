@@ -110,7 +110,7 @@ void test_sequence_container()
         C cont{"abc", "def"};
         bool before_called{false};
         scoped_any_connection c = cont.before_erase
-            ([&before_called](typename C::value_type)
+            ([&](typename C::value_type)
              { before_called = true; });
         cont.clear();
         BOOST_TEST(before_called);
@@ -122,7 +122,7 @@ void test_sequence_container()
         C cont{"abc", "def"};
         bool before_called{false};
         scoped_any_connection c = cont.before_erase
-            ([&before_called](typename C::value_type e)
+            ([&](typename C::value_type e)
              {
                  BOOST_TEST(e == "abc");
                  before_called = true;
@@ -133,17 +133,46 @@ void test_sequence_container()
         BOOST_TEST(before_called);
     }
         
+    //auxiliar function to test erase of a range
+    auto test_erase_rng =
+    []{
+        C cont({"abc", "def", "ghi", "jkl", "mno"});
+        std::size_t step{0};
+        auto c = cont.before_erase(
+            [step](C&, typename C::iterator fst, typename C::iterator lst) mutable {
+                if(step == 0) {
+                    BOOST_TEST(std::distance(fst, lst) == 2);
+                    BOOST_TEST(*fst++ == "abc");
+                    BOOST_TEST(*fst == "def");
+                } else if(step == 1) {
+                    BOOST_TEST(std::distance(fst, lst) == 3);
+                    BOOST_TEST(*fst++ == "ghi");
+                    BOOST_TEST(*fst++ == "jkl");
+                    BOOST_TEST(*fst == "mno");
+                }
+                ++step;
+            });
+        return cont;
+    };
+    
     //erase(first, last) 
     {
         C cont{"abc", "def"};
         bool before_called{false};
         scoped_any_connection c = cont.before_erase
-            ([&before_called](typename C::value_type)
+            ([&](typename C::value_type)
              { before_called = true; });
         auto ret = cont.erase(cont.cbegin(), cont.cend());
         BOOST_TEST(ret == cont.end());
         BOOST_TEST(cont.empty());
         BOOST_TEST(before_called);
+
+        //tests a reaction(Rng, First, Last) to `before_erase`
+        {
+            auto cont = test_erase_rng();
+            cont.erase(cont.begin(), std::next(std::next(cont.begin())));
+            // cont.erase(cont.begin(), cont.end());
+        }
     }
     
     //assign(n, val)
@@ -221,7 +250,7 @@ void test_sequence_container()
         C cont{"abc", "def", "ghi"};
         bool before_erase_called{false};
         scoped_any_connection c = cont.before_erase
-            ([&before_erase_called](typename C::value_type e)
+            ([&](typename C::value_type e)
              {
                  BOOST_TEST(e == "ghi");
                  before_erase_called = true;
@@ -334,6 +363,27 @@ void test_sequence_container()
             },
             {"abc", "def"});
     }
+
+    //auxiliar function to test insertion of a range
+    auto test_insert_rng =
+    []{
+        C cont({"abc", "def"});
+        std::size_t step{0};
+        auto c = cont.for_each(
+            [&step](C&, typename C::iterator fst, typename C::iterator lst) {
+                if(step == 0) {
+                    BOOST_TEST(std::distance(fst, lst) == 2);
+                    BOOST_TEST(*fst == "abc");
+                    BOOST_TEST(*std::prev(lst) == "def");
+                } else if(step == 1) {
+                    BOOST_TEST(std::distance(fst, lst) == 3);
+                    BOOST_TEST(*fst == "ghi");
+                    BOOST_TEST(*std::prev(lst) == "mno");
+                }
+                ++step;
+            });
+        return cont;
+    };
     
     //insert(pos, first, last)
     {
@@ -348,6 +398,13 @@ void test_sequence_container()
                 return std::move(cont);
             },
             {"abc", "def", "abc"});
+
+        //tests a reaction(Rng, First, Last) to `for_each`
+        {
+            auto cont = test_insert_rng();
+            std::initializer_list<std::string> il{"ghi", "jkl", "mno"};
+            cont.insert(cont.end(), il.begin(), il.end());
+        }
     }
     
     //insert(ilist)
@@ -362,6 +419,12 @@ void test_sequence_container()
                 return std::move(cont);
             },
             {"abc", "def", "abc"});
+        
+        //tests a reaction(Rng, First, Last) to `for_each`
+        {
+            auto cont = test_insert_rng();
+            cont.insert(cont.end(), {"ghi", "jkl", "mno"});
+        }
     }
     
     //push_back()

@@ -116,6 +116,16 @@ public:
         return it;
     }
     
+    template<typename InputIt>
+    void insert(InputIt first, InputIt last)
+    {
+        for(;first != last; ++first)
+            insert(_container.end(), *first);
+    }
+
+    void insert(std::initializer_list<value_type> ilist)
+    { insert(ilist.begin(), ilist.end()); }
+        
     const_iterator find(const key_type& key) const
     { return _container.find(key); }
     

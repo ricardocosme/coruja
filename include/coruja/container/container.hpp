@@ -51,6 +51,10 @@ protected:
     
     observed_t _container;
     
+    template<typename Container, typename Reaction>
+    friend typename Container::for_each_connection_t
+    detail::for_each_impl(Container&, Reaction&&);
+    
 public:
     
     using for_each_connection_t = typename after_insert_rng_t::connection_t;
@@ -118,8 +122,7 @@ public:
         auto _last = const_it_cast(_container, last);
         emit_before_erase(_first, _last);
         //GCC 4.8.2 uses iterator and not const_iterator(see const_it_cast.hpp)
-        auto it = _container.erase(_first, _last);
-        return it;
+        return _container.erase(_first, _last);
     }
     
     void swap(Derived& other) noexcept
@@ -149,12 +152,21 @@ public:
     
     template<typename F>
     enable_if_t<
-        !boost::hof::is_invocable<
-            F, value_type&>::value,
+        boost::hof::is_invocable<
+            F, Derived&, iterator, iterator>::value,
         for_each_connection_t
     >
     for_each(F&& f)
-    { return detail::for_each_by<F, detail::fwd_by_it>(as_derived(), std::forward<F>(f)); }
+    { return detail::for_each_rng<F>(as_derived(), std::forward<F>(f)); }
+    
+    template<typename F>
+    enable_if_t<
+        boost::hof::is_invocable<
+            F, Derived&, iterator>::value,
+        for_each_connection_t
+    >
+    for_each(F&& f)
+    { return detail::for_each_value<F, detail::fwd_by_it>(as_derived(), std::forward<F>(f)); }
     
     template<typename F>
     enable_if_t<
@@ -163,18 +175,30 @@ public:
         for_each_connection_t
     >
     for_each(F&& f)
-    { return detail::for_each_by<F, detail::fwd_by_ref>(as_derived(), std::forward<F>(f)); }
+    { return detail::for_each_value<F, detail::fwd_by_ref>(as_derived(), std::forward<F>(f)); }
 
     template<typename F>
     enable_if_t<
-        !boost::hof::is_invocable<
-            F, value_type&>::value,
+        boost::hof::is_invocable<
+            F, Derived&, iterator, iterator>::value,
         before_erase_connection_t
     >
     before_erase(F&& f)
     {
         return _before_erase.connect
-            (detail::for_each_impl<F, detail::fwd_by_it<F&>>{std::forward<F>(f)});
+            (detail::wrapper_for_each_rng<F>{std::forward<F>(f)});
+    }
+    
+    template<typename F>
+    enable_if_t<
+        boost::hof::is_invocable<
+            F, Derived&, iterator>::value,
+        before_erase_connection_t
+    >
+    before_erase(F&& f)
+    {
+        return _before_erase.connect
+            (detail::wrapper_for_each_value<F, detail::fwd_by_it<F&>>{std::forward<F>(f)});
     }    
     
     template<typename F>
@@ -186,7 +210,7 @@ public:
     before_erase(F&& f)
     {
         return _before_erase.connect
-            (detail::for_each_impl<F, detail::fwd_by_ref<F&>>{std::forward<F>(f)});
+            (detail::wrapper_for_each_value<F, detail::fwd_by_ref<F&>>{std::forward<F>(f)});
     }
 
     friend bool operator==(const Derived& lhs, const Derived& rhs)

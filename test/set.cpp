@@ -70,4 +70,33 @@ int main()
                 return std::move(cont);
             });
     }
-}
+    
+    //insert_sorted
+    {
+        cont_t cont{"1", "6"};
+        std::size_t step{0};
+        cont.for_each([&](cont_t&, cont_t::iterator fst, cont_t::iterator lst)
+        {
+            if(step == 0) {
+                BOOST_TEST(std::distance(fst, lst) == 2);
+                BOOST_TEST(*fst++ == "1");
+                BOOST_TEST(*fst == "6");
+                step = 1;
+            } else if(step == 1) {
+                BOOST_TEST(std::distance(fst, lst) == 2);
+                BOOST_TEST(*fst++ == "4");
+                BOOST_TEST(*fst == "5");
+                step = 2;
+            } else if(step == 2) {
+                BOOST_TEST(std::distance(fst, lst) == 3);
+                BOOST_TEST(*fst++ == "7");
+                BOOST_TEST(*fst++ == "8");
+                BOOST_TEST(*fst++ == "9");
+                step = 3;
+            } else abort();
+        });
+        cont.insert_sorted({"4", "5"});
+        std::initializer_list<cont_t::value_type> il{"7", "8", "9"};
+        cont.insert_sorted(il);
+    }
+ }
