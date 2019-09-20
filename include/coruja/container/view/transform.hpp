@@ -16,6 +16,7 @@
 #include <range/v3/view_facade.hpp>
 
 #include <type_traits>
+#include <utility>
 
 template<typename Rng, typename Transform>
 class coruja_transform_view
@@ -49,7 +50,12 @@ class coruja_transform_view
         {
             using namespace ranges;
             auto rng = coruja_transform_view{from, base::as_transform()};
-            base::_f(rng, next(begin(rng), distance(begin(from), it)));
+            using rng_iterator = decltype(
+                ranges::begin(std::declval<coruja_transform_view&>()));
+            base::_f(rng,
+                     rng_iterator{
+                             coruja_transform_view::cursor{
+                                 it, base::as_transform()}});
         }
     };
         
