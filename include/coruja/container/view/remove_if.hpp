@@ -33,7 +33,7 @@ private:
 
         template<typename Ref>
         void operator()(Ref&& ref)
-        {;
+        {
             if(!base::as_invoker()(ref))
                 base::_f(std::forward<Ref>(ref));
         }
@@ -69,14 +69,6 @@ public:
     template<typename F>
     by_ref_t<F,before_erase_connection_t> before_erase(F&& f)
     { return _rng.before_erase(invoke_observer_by_ref(std::forward<F>(f))); }
-
-    //Experimental
-    signal_id_t for_each_id() const noexcept
-    { return _rng.for_each_id(); }
-
-    //Experimental
-    signal_id_t before_erase_id() const noexcept
-    { return _rng.before_erase_id(); }
     // </ObservableErasableRangeView>
 
     // <range>
