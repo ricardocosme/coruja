@@ -13,6 +13,7 @@
 #include <range/v3/utility/concepts.hpp>
 #include <range/v3/utility/functional.hpp>
 #include <range/v3/view_facade.hpp>
+#include <range/v3/range_traits.hpp>
 
 #include "coruja/container/detail/invoke.hpp"
 #include "coruja/container/view/container.hpp"
@@ -40,7 +41,33 @@ private:
     };
 
     template<typename F>
+    struct invoke_observer_impl : private coruja::detail::invoke_observer_base<F,Pred>
+    {
+        using base = coruja::detail::invoke_observer_base<F,Pred>;
+        using base::base;
+        
+        template<typename From, typename It>
+        void operator()(From& from, It it) 
+        {
+            using namespace ranges;
+            if(!base::as_invoker()(*it))
+            {
+                using self = coruja_remove_if_view<ObservableErasableRange,Pred>;
+                using rng_iterator = range_iterator_t<self>;
+
+                auto rng = coruja_remove_if_view{from, base::as_invoker()};
+                base::_f(rng, rng_iterator{ coruja_remove_if_view::cursor{ 
+                    it, begin(from), end(from), base::as_invoker()}});
+            }
+        }
+    };
+
+    template<typename F>
     invoke_observer_by_ref_impl<typename std::decay<F>::type> invoke_observer_by_ref(F&& f)
+    { return {_pred, std::forward<F>(f)}; }
+
+    template<typename F>
+    invoke_observer_impl<typename std::decay<F>::type> invoke_observer(F&& f)
     { return {_pred, std::forward<F>(f)}; }
 
 public:
@@ -53,6 +80,12 @@ public:
                             F, ranges::range_reference_t<Rng>
                         >::value,Ret>::type;
 
+    template<typename F, typename Ret>
+    using by_it_t = typename std::enable_if<
+                        !boost::hof::is_invocable<
+                            F, ranges::range_reference_t<Rng>
+                        >::value,Ret>::type;
+
     using value_type = typename Rng::value_type;
     using observed_t = typename Rng::observed_t;
     using for_each_connection_t = typename Rng::for_each_connection_t;
@@ -62,9 +95,20 @@ public:
     const observed_t& observed() const noexcept
     { return _rng.observed(); }
 
+    //for_each
+    template<typename F>
+    by_it_t<F,for_each_connection_t> for_each(F&& f)
+    { return _rng.for_each(invoke_observer(std::forward<F>(f))); }
+
     template<typename F>
     by_ref_t<F,for_each_connection_t> for_each(F&& f)
     { return _rng.for_each(invoke_observer_by_ref(std::forward<F>(f))); }
+    
+
+    //before_erase
+    template<typename F>
+    by_it_t<F,before_erase_connection_t> before_erase(F&& f)
+    { return _rng.before_erase(invoke_observer(std::forward<F>(f))); }
 
     template<typename F>
     by_ref_t<F,before_erase_connection_t> before_erase(F&& f)
