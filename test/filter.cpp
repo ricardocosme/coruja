@@ -45,6 +45,22 @@ int main()
         (void)filter;
     }
 
+    //Concept
+    {
+        svector s;
+        auto t = view::filter(s, True{});
+        using fsvector = decltype(t);
+        static_assert(std::is_same<fsvector::observed_t,
+                      svector::observed_t>::value, "");
+        static_assert(std::is_same<fsvector::for_each_connection_t,
+                      svector::for_each_connection_t>::value, "");
+        static_assert(std::is_same<fsvector::before_erase_connection_t,
+                      svector::before_erase_connection_t>::value, "");
+
+        static_assert(is_observable_erasable_range<svector>::value, "");
+        static_assert(is_observable_erasable_range<fsvector>::value, "");
+    }
+
     // empty
     {
         svector vector;
