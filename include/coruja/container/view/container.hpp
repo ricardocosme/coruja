@@ -84,5 +84,10 @@ enable_if_t<
 >
 view(ObservableErasableRange&& rng)
 { return std::forward<ObservableErasableRange>(rng); }
-    
+
+template<typename ObservableErasableRange>
+using view_t =
+    meta::_t<std::decay<decltype(view(std::declval<ObservableErasableRange>()))>>;
+
+
 }}

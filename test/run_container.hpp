@@ -4,6 +4,7 @@
 
 #include <boost/core/lightweight_test.hpp>
 #include <coruja/support/type_traits.hpp>
+#include <coruja/support/signal/any_connection.hpp>
 
 #include <initializer_list>
 #include <string>
@@ -89,3 +90,32 @@ void run(V pvec, E for_each_expected,
     BOOST_TEST(before_erase_called);
     BOOST_TEST(before_erase_by_ref_called);
 }
+
+template<typename View, typename F, typename E >
+void run_view(View pvec, E for_each_expected, F&& f, E erased_expected)
+{
+    using conn = coruja::scoped_any_connection;
+    auto vec = std::move(pvec);
+    E rres, reres;
+    E rres_it, reres_it;
+    conn feconn = vec.for_each([&rres](const typename View::value_type& v)
+    { emplace(rres, v); });
+    conn feconn_it = vec.for_each([&rres_it](View& view, typename View::iterator it)
+    { emplace(rres_it, *it); });
+    conn beccon = vec.before_erase([&reres](const typename View::value_type& v)
+    { emplace(reres, v); });
+    conn beccon_it = vec.before_erase([&reres_it](View& view, typename View::iterator it)
+    { emplace(reres_it, *it); });
+    auto rvec = f(vec);
+    BOOST_TEST(rres == for_each_expected);
+    BOOST_TEST(rres_it == for_each_expected);
+    if(!erased_expected.empty())
+    {
+        BOOST_TEST(reres == erased_expected);
+        BOOST_TEST(reres_it == erased_expected);
+    }
+}
+
+template<typename View, typename F = F_<View>, typename E >
+void run_view(View pvec, E for_each_expected, F&& f = F_<View>{})
+{ run_view(std::move(pvec), std::move(for_each_expected), std::move(f), E{}, E{}); }
