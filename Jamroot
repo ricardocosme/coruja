@@ -59,6 +59,7 @@ run test/observer_class.cpp ;
 run test/for_each.cpp ;
 run test/view_collision.cpp ;
 run test/any_container.cpp ;
+run test/filter.cpp ;
 
 run test/boost_serialization_object.cpp
 : : : <library>/boost//serialization <library>/boost//filesystem ;

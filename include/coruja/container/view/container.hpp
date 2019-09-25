@@ -23,6 +23,7 @@ class container : ranges::view_base
     
 public:
     
+    using value_type = typename Rng::value_type;
     using observed_t = typename Rng::observed_t;
     using for_each_connection_t = typename Rng::for_each_connection_t;
     using before_erase_connection_t = typename Rng::before_erase_connection_t;

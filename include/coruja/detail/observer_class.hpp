@@ -105,6 +105,19 @@ struct range_cbk : private Reaction
         boost::hof::is_invocable<Reaction,
                                  self_element_type<Self>&,
                                  To_&,
+                                 typename To_::iterator,
+                                 typename To_::iterator>::value
+    >::type
+    operator()(To_& o,
+               typename To_::iterator fst,
+               typename To_::iterator lst) const
+    { Reaction::operator()(*_self, o, fst, lst); }
+
+    template<typename To_>
+    typename std::enable_if<
+        boost::hof::is_invocable<Reaction,
+                                 self_element_type<Self>&,
+                                 To_&,
                                  typename To_::iterator>::value
     >::type
     operator()(To_& o, typename To_::iterator it) const
