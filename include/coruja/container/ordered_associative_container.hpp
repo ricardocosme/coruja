@@ -32,6 +32,29 @@ public:
     using reverse_iterator = typename base::observed_t::reverse_iterator;
     using key_compare = typename base::observed_t::key_compare;
     
+    //precondition: [first, last) must denote a sorted range of values
+    //following the predicate. It's undefined behaviour when this
+    //precondition isn't satisfied.
+    template<typename InputIt>
+    void insert_sorted(InputIt first, InputIt last)
+    {
+        if(first == last) return;
+        
+        auto beg = _container.insert(_container.end(), *first++);
+        auto hint = beg;
+        
+        for(; first != last; ++first, ++hint)
+            hint = _container.insert(hint, *first);
+
+        emit_after_insert(beg, hint);
+    }
+        
+    //precondition: [first, last) must denote a sorted range of values
+    //following the predicate. It's undefined behaviour when this
+    //precondition isn't satisfied.
+    void insert_sorted(std::initializer_list<typename base::value_type> ilist)
+    { insert_sorted(ilist.begin(), ilist.end()); }
+    
     reverse_iterator rbegin() noexcept
     { return _container.rbegin(); }
     

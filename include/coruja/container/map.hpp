@@ -48,9 +48,6 @@ class map : public ordered_associative_container<
     
     using base::_container;
     
-    template<typename F, template <typename> class Fwd, typename Container>
-    friend typename Container::for_each_connection_t detail::for_each_by(Container&, F&&);
-
     friend struct map_serialization;
     
 public:
@@ -131,24 +128,6 @@ public:
     
     mapped_type& operator[](key_type&& key)
     { return _container[std::move(key)]; }
-    
-    template<typename InputIt>
-    void insert(InputIt first, InputIt last)
-    {
-        auto before_size = _container.size();
-        _container.insert(first, last);
-        if (_container.size() != before_size)
-        {
-            for(auto it(first); it != last; ++it)
-            {
-                auto it_ = _container.find(it->first);
-                emit_after_insert(it_, std::next(it_));
-            }
-        }
-    }
-    
-    void insert(std::initializer_list<value_type> ilist)
-    { insert(ilist.begin(), ilist.end()); }        
 };
 
 }
