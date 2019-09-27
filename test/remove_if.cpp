@@ -7,6 +7,7 @@
 #include "check_equal.hpp"
 
 #include <coruja/container/algorithm/remove_if.hpp>
+#include <coruja/container/vector.hpp>
 
 #include <vector>
 
@@ -57,5 +58,16 @@ int main() {
 
         check_equal(numbers, data);
         BOOST_TEST(iterator == numbers.begin());
+    }
+
+    //Overload that receives a range
+    {
+        using ovector = coruja::vector<int>;
+        ovector v{data};
+        auto c = v.before_erase([](ovector&, ovector::iterator fst, ovector::iterator lst)
+        { BOOST_TEST((std::vector<int>{fst, lst} == std::vector<int>{1, 5, 3})); });
+        auto is_odd = [](int i){ return i%2; };
+        v.erase(coruja::remove_if(v, is_odd), v.end());
+        c.disconnect();
     }
 }

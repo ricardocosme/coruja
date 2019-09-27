@@ -6,7 +6,10 @@
 
 #pragma once
 
+#include "coruja/support/macro.hpp"
+
 #include <algorithm>
+#include <utility>
 
 namespace coruja {
 
@@ -35,4 +38,9 @@ ForwardIterator remove_if(ForwardIterator first, ForwardIterator last, Predicate
     return result;
 }
 
+template<typename Rng, typename UnaryPredicate>
+inline auto remove_if(Rng&& rng, UnaryPredicate pred)
+CORUJA_DECLTYPE_AUTO_RETURN
+( ::coruja::remove_if(std::begin(rng), std::end(rng), std::move(pred)) )
+    
 }
