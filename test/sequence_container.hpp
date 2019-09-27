@@ -364,13 +364,31 @@ void test_sequence_container()
             {"abc", "def"});
     }
 
-    //auxiliar function to test insertion of a range
+    //test for_each with a reaction that operates on range that is empty
+    {
+        C cont;
+        bool called{false};
+        cont.for_each([&](C&, typename C::iterator, typename C::iterator)
+                     { called = true; });
+        BOOST_TEST(!called);
+    }
+    
+   //test for_each with a reaction that operates on each value and
+   //with a range that is empty
+    {
+        C cont;
+        bool called{false};
+        cont.for_each([&](typename C::value_type&){ called = true; });
+        BOOST_TEST(!called);
+    }
+    
+     //auxiliar function to test insertion of a range
     auto test_insert_rng =
     []{
         C cont({"abc", "def"});
-        std::size_t step{0};
         auto c = cont.for_each(
-            [&step](C&, typename C::iterator fst, typename C::iterator lst) {
+            [](C&, typename C::iterator fst, typename C::iterator lst) {
+                static std::size_t step{0};
                 if(step == 0) {
                     BOOST_TEST(std::distance(fst, lst) == 2);
                     BOOST_TEST(*fst == "abc");

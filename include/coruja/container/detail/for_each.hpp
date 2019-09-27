@@ -46,7 +46,8 @@ template<typename Container, typename Reaction>
 inline typename Container::for_each_connection_t
 for_each_impl(Container& c, Reaction&& cbk)
 {
-    cbk(c, c.begin(), c.end());
+    if(c.begin() != c.end())
+        cbk(c, c.begin(), c.end());
     return c._after_insert.connect(std::move(cbk));
 }
 
