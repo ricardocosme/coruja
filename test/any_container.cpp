@@ -6,6 +6,7 @@
 #include <coruja/container/view/any_container.hpp>
 #include <coruja/container/vector.hpp>
 #include <coruja/container/map.hpp>
+#include <coruja/container/view/filter.hpp>
 #include <coruja/container/view/transform.hpp>
 
 #include <boost/core/lightweight_test.hpp>
@@ -117,13 +118,73 @@ int main()
     //from transform
     {
         simap originator = { {"a",1}, {"b", 3}, {"c",5}, {"d",7}, {"e", 9} };
-        sany_t any(view::transform(originator, keys{} ));
+        auto t = view::transform(originator, keys{} );
+        sany_t any(t);
         svec expected_foreach = { "a", "b", "c", "d", "e" };
         svec keys_toRemove = { "c", "e" };
         svec erased_expected = { "c", "e" };
 
         run_view(any, expected_foreach, change(originator, keys_toRemove), erased_expected);
     }
+    //from transform lambda
+    {
+        simap originator = { {"a",1}, {"b", 3}, {"c",5}, {"d",7}, {"e", 9} };
+        auto t = view::transform(originator, [](const simap::value_type& t ){ return t.first; });
+        sany_t any(t);
+        svec expected_foreach = { "a", "b", "c", "d", "e" };
+        svec keys_toRemove = { "c", "e" };
+        svec erased_expected = { "c", "e" };
+
+        run_view(t, expected_foreach, change(originator, keys_toRemove), erased_expected);
+    }
+
+    //from filter
+    {
+        ivector originator = { 1, 3, 5, 7, 9};
+        iany_t any(view::filter(originator, [](int i){ return i>5; } ) );
+        ivec expected_foreach = { 7, 9};
+        ivec keys_toRemove = {4};
+        ivec erased_expected = {9};
+
+        run_view(any, expected_foreach, change(originator, keys_toRemove), erased_expected );
+    }
+    
+     //from filter map
+    {
+        simap originator = { {"a",1}, {"b", 3}, {"c",5}, {"d",7}, {"e", 9} };
+        siany_t any(originator | view::filter([](simap::value_type t ){ return true; }) );
+        sivec expected_foreach = { {"a",1}, {"b", 3}, {"c",5}, {"d",7}, {"e", 9} };
+        svec keys_toRemove = { "c", "e" };
+        sivec erased_expected = {{"c",5}, {"e", 9}};
+
+        run_view(any, expected_foreach, change(originator, keys_toRemove), erased_expected);
+    }
+
+    //from filter transform
+    {
+        simap originator = { {"a",1}, {"b", 3}, {"c",5}, {"d",7}, {"e", 9} };
+        iany_t any(view::transform(originator, [](simap::value_type t){ return t.second; })
+                   | view::filter([](int i){ return i > 5; })
+        );
+        ivec expected_foreach = { 7, 9};
+        svec keys_toRemove = { "e" };
+        ivec erased_expected = {9};
+
+        run_view(any, expected_foreach, change(originator, keys_toRemove), erased_expected);
+    }
+
+    //from transform filter
+   {
+       simap originator = { {"a",1}, {"b", 3}, {"c",5}, {"d",7}, {"e", 9} };
+       iany_t any(view::transform(originator
+                                  | view::filter([](simap::value_type t){ return t.second > 5; })
+                                  , [](simap::value_type t){ return t.second; }));
+       ivec expected_foreach = { 7, 9};
+       svec keys_toRemove = { "e" };
+       ivec erased_expected = {9};
+
+       run_view(any, expected_foreach, change(originator, keys_toRemove), erased_expected);
+   }
 
     return 0;
 }
