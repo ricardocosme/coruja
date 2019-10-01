@@ -122,6 +122,7 @@ class coruja_transform_view
     { return {_transform, std::forward<F>(f)}; }
     
 public:
+    using value_type = coruja::result_of_t<Transform(ranges::range_reference_t<Rng>)>;
     using observed_t = typename Rng::observed_t;
     using for_each_connection_t = typename Rng::for_each_connection_t;
     using before_erase_connection_t = typename Rng::before_erase_connection_t;
