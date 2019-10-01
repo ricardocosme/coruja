@@ -40,8 +40,10 @@ class coruja_transform_view
     };
     
     template<typename F>
-    struct invoke_observer_impl : private invoke_observer_base<F>
+    class invoke_observer_impl : invoke_observer_base<F>
     {
+        using invoke_observer_base<F>::operator();
+    public:
         using base = invoke_observer_base<F>;
         using base::base;
         
