@@ -161,4 +161,27 @@ int main()
         cont.emplace("k1", "abc");
         BOOST_TEST(cont["k1"] == "abc");
     }
+
+    //erase_if
+    {
+        using omap = coruja::map<int, int>;
+        omap m{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}};
+        std::vector<int> removed;
+        auto c = m.before_erase([&](omap::value_type p){ removed.push_back(p.first); });
+        auto is_key_odd = [](omap::value_type p){ return p.first%2; };
+        coruja::erase_if(m, is_key_odd);
+        BOOST_TEST(removed == std::vector<int>({1, 3, 5}));
+        c.disconnect();
+    }
+
+    //erase
+    {
+        using omap = coruja::map<int, int>;
+        omap m{{1, 1}, {2, 2}, {3, 3}, {5, 5}, {6, 6}};
+        std::vector<int> removed;
+        auto c = m.before_erase([&](omap::value_type p){ removed.push_back(p.first); });
+        coruja::erase(m, omap::value_type{3, 3});
+        BOOST_TEST(removed == std::vector<int>({3}));
+        c.disconnect();
+    }
 }

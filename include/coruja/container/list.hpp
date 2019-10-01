@@ -213,4 +213,24 @@ inline bool operator>=(const list<T, Allocator, Observed_, Derived_, Signal>& lh
                        const list<T, Allocator, Observed_, Derived_, Signal>& rhs)
 { return lhs.observed() >= rhs.observed(); }
 
+template<typename T,
+         typename Allocator,
+         template <typename, typename> class Observed,
+         typename Derived,
+         template <typename> class Signal,
+         typename Predicate>
+inline void erase_if(list<T, Allocator, Observed, Derived, Signal>& cont,
+                     Predicate&& pred)
+{ cont.remove_if(std::forward<Predicate>(pred)); }
+
+template<typename T,
+         typename Allocator,
+         template <typename, typename> class Observed,
+         typename Derived,
+         template <typename> class Signal,
+         typename U>
+inline void erase(list<T, Allocator, Observed, Derived, Signal>& cont,
+                  const U& value)
+{ erase_if(cont, [&](const T& o){ return o == value; }); }
+
 }

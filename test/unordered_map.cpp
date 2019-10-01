@@ -4,6 +4,7 @@
 #include <boost/core/lightweight_test.hpp>
 #include <coruja/container/unordered_map.hpp>
 
+#include <set>
 #include <string>
 
 using namespace coruja;
@@ -137,5 +138,28 @@ int main()
         cont_t umap({{"k1", "abc"}});
         umap.emplace("k1", "abc");
         BOOST_TEST(umap["k1"] == "abc");
+    }
+
+    //erase_if
+    {
+        using ounordered_map = coruja::unordered_map<int, int>;
+        ounordered_map m{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}};
+        std::set<int> removed;
+        auto c = m.before_erase([&](ounordered_map::value_type p){ removed.insert(p.first); });
+        auto is_key_odd = [](ounordered_map::value_type p){ return p.first%2; };
+        coruja::erase_if(m, is_key_odd);
+        BOOST_TEST(removed == std::set<int>({1, 3, 5}));
+        c.disconnect();
+    }
+
+    //erase
+    {
+        using ounordered_map = coruja::unordered_map<int, int>;
+        ounordered_map m{{1, 1}, {2, 2}, {3, 3}, {5, 5}, {6, 6}};
+        std::vector<int> removed;
+        auto c = m.before_erase([&](ounordered_map::value_type p){ removed.push_back(p.first); });
+        coruja::erase(m, ounordered_map::value_type{3, 3});
+        BOOST_TEST(removed == std::vector<int>({3}));
+        c.disconnect();
     }
 }

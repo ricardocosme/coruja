@@ -8,6 +8,7 @@
 
 #include "coruja/container/unordered_associative_container.hpp"
 #include "coruja/container/detail/derived_or_this.hpp"
+#include "coruja/container/detail/erase_nodes_if.hpp"
 #include "coruja/support/signal.hpp"
 #include "coruja/support/type_traits.hpp"
 
@@ -17,6 +18,7 @@
 #include <initializer_list>		
 #include <unordered_map>
 #include <type_traits>
+#include <utility>
 
 namespace coruja {
 
@@ -120,4 +122,34 @@ public:
     { return _container.rehash(n); }
 };
     
+template<typename Key,
+         typename T,
+         typename Hash,
+         typename KeyEqual,
+         typename Allocator,
+         template <typename, typename, typename,
+                   typename, typename> class Observed,
+         typename Derived,
+         template <typename> class Signal,
+         typename Predicate>
+inline void erase_if(
+    unordered_map<Key, T, Hash, KeyEqual, Allocator, Observed, Derived, Signal>& c,
+    Predicate&& pred)
+{ detail::erase_nodes_if(c, std::forward<Predicate>(pred)); }
+
+template<typename Key,
+         typename T,
+         typename Hash,
+         typename KeyEqual,
+         typename Allocator,
+         template <typename, typename, typename,
+                   typename, typename> class Observed,
+         typename Derived,
+         template <typename> class Signal,
+         typename U>
+inline void erase(
+    unordered_map<Key, T, Hash, KeyEqual, Allocator, Observed, Derived, Signal>& c,
+    const U& value)
+{ detail::erase(c, value); }
+
 }

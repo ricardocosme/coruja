@@ -99,4 +99,26 @@ int main()
         std::initializer_list<cont_t::value_type> il{"7", "8", "9"};
         cont.insert_sorted(il);
     }
- }
+
+    //erase_if
+    {
+        using oset = coruja::set<int>;
+        oset s{{1, 2, 3, 4, 5, 6}};
+        std::vector<int> removed;
+        auto c = s.before_erase([&](int i){ removed.push_back(i); });
+        auto is_odd = [](int i){ return i%2; };
+        coruja::erase_if(s, is_odd);
+        BOOST_TEST((removed == std::vector<int>{1, 3, 5}));
+        c.disconnect();
+    }
+
+    //erase
+    {
+        using sset = coruja::set<std::string>;
+        sset s({"xxx", "def", "jkl"});
+        auto c = s.before_erase([](std::string e)
+                                    { BOOST_TEST(e == std::string{"xxx"}); });
+        coruja::erase(s, "xxx");
+        c.disconnect();
+    }
+}

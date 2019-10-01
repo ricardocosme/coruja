@@ -52,7 +52,6 @@ run test/list.cpp ;
 run test/map.cpp ;
 run test/object.cpp ;
 run test/observer_class.cpp ;
-run test/remove_if.cpp ;
 run test/set.cpp ;
 run test/signal.cpp ;
 run test/transform_object.cpp ;

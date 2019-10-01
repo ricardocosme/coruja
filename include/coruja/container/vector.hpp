@@ -10,9 +10,12 @@
 #include "coruja/container/detail/derived_or_this.hpp"
 #include "coruja/support/signal.hpp"
 #include "coruja/support/type_traits.hpp"
+#include <range/v3/utility/functional.hpp>
 
+#include <algorithm>
 #include <initializer_list>		
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace coruja { 
@@ -144,5 +147,40 @@ public:
     reference at(size_type pos)
     { return _container.at(pos); }
 };
+
+template<typename T,
+         typename Alloc,
+         template <typename, typename> class Observed,
+         typename Derived,
+         template <typename> class Signal,
+         typename Predicate>
+inline void erase_if(vector<T, Alloc, Observed, Derived, Signal>& cont,
+                     Predicate&& pred)
+{
+    //We use std::stable_partition here and not std::remove_if because
+    //we need to preserve the values of the elements that will be
+    //removed. This is a requirement for the before_erase.
+    cont.erase(
+        std::stable_partition(cont.begin(), cont.end(),
+                              ranges::not_fn(std::forward<Predicate>(pred))),
+        cont.end());
+}
+
+template<typename T,
+         typename Alloc,
+         template <typename, typename> class Observed,
+         typename Derived,
+         template <typename> class Signal,
+         typename U>
+inline void erase(vector<T, Alloc, Observed, Derived, Signal>& cont,
+                  const U& value)
+{
+    cont.erase(
+        //See the comment about std::stable_partion at erase_if().
+        std::stable_partition(
+            cont.begin(), cont.end(),
+            ranges::not_fn([&](const T& o){ return o == value; })),
+        cont.end());
+}
 
 }

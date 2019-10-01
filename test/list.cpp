@@ -100,4 +100,26 @@ int main()
         BOOST_TEST(lst.size() == 5);
         BOOST_TEST(lst.back() == "mno");
     }
+    
+    //erase_if
+    {
+        using olist = coruja::list<int>;
+        olist v{{1, 2, 3, 4, 5, 6}};
+        std::vector<int> removed;
+        auto c = v.before_erase([&](int i){ removed.push_back(i); });
+        auto is_odd = [](int i){ return i%2; };
+        coruja::erase_if(v, is_odd);
+        BOOST_TEST(removed == std::vector<int>({1, 3, 5}));
+        c.disconnect();
+    }
+
+    //erase
+    {
+        slist vec({"xxx", "def", "xxx", "jkl", "xxx"});
+        std::vector<std::string> removed;
+        auto c = vec.before_erase([&](std::string s){ removed.push_back(s); });
+        coruja::erase(vec, "xxx");
+        BOOST_TEST(removed == std::vector<std::string>({"xxx", "xxx", "xxx"}));
+        c.disconnect();
+    }
 }

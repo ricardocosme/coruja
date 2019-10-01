@@ -140,4 +140,24 @@ int main()
         const auto& cvec = vec;
         BOOST_TEST(cvec[0] == "abc");
     }
+
+    //erase_if
+    {
+        using ovector = coruja::vector<int>;
+        ovector v{{1, 2, 3, 4, 5, 6}};
+        auto c = v.before_erase([](ovector&, ovector::iterator fst, ovector::iterator lst)
+        { BOOST_TEST((std::vector<int>{fst, lst} == std::vector<int>{1, 3, 5})); });
+        auto is_odd = [](int i){ return i%2; };
+        coruja::erase_if(v, is_odd);
+        c.disconnect();
+    }
+
+    //erase
+    {
+        svector vec({"xxx", "def", "xxx", "jkl", "xxx"});
+        auto c = vec.before_erase([](svector&, svector::iterator fst, svector::iterator lst)
+        { BOOST_TEST((std::vector<std::string>{fst, lst} == std::vector<std::string>{"xxx", "xxx", "xxx"})); });
+        coruja::erase(vec, "xxx");
+        c.disconnect();
+    }
 }
