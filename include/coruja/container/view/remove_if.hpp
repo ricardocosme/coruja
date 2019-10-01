@@ -52,10 +52,9 @@ private:
             using namespace ranges;
             if(!base::as_invoker()(*it))
             {
-                using self = coruja_remove_if_view<ObservableErasableRange,Pred>;
-                using rng_iterator = range_iterator_t<self>;
+                using rng_iterator = range_iterator_t<coruja_remove_if_view>;
 
-                auto rng = coruja_remove_if_view{from, base::as_invoker()};
+                auto rng = coruja_remove_if_view(from, base::as_invoker());
                 base::_f(rng, rng_iterator{ coruja_remove_if_view::cursor{ 
                     it, begin(from), end(from), base::as_invoker()}});
             }
