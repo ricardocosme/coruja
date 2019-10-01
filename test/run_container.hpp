@@ -5,6 +5,7 @@
 #include <boost/core/lightweight_test.hpp>
 #include <coruja/support/type_traits.hpp>
 #include <coruja/support/signal/any_connection.hpp>
+#include <range/v3/range_traits.hpp>
 
 #include <initializer_list>
 #include <string>
@@ -91,28 +92,61 @@ void run(V pvec, E for_each_expected,
     BOOST_TEST(before_erase_by_ref_called);
 }
 
+template<typename E>
+struct Fn_ref
+{
+    template<typename T>
+    void operator()(const T& t)
+    { emplace(res, t); }
+
+    E& res;
+};
+template<typename E>
+struct Fn_it
+{
+    template<typename V, typename It>
+    void operator()(V&, It it)
+    { emplace(res, *it); }
+
+    E& res;
+};
+
 template<typename View, typename F, typename E >
 void run_view(View pvec, E for_each_expected, F&& f, E erased_expected)
 {
     using conn = coruja::scoped_any_connection;
     auto vec = std::move(pvec);
+    using iterator = ranges::range_iterator_t<View>;
     E rres, reres;
     E rres_it, reres_it;
+    E rres_t, reres_t;
+    E rres_it_t, reres_it_t;
+    //Lambda
     conn feconn = vec.for_each([&rres](const typename View::value_type& v)
     { emplace(rres, v); });
-    conn feconn_it = vec.for_each([&rres_it](View& view, typename View::iterator it)
+    conn feconn_it = vec.for_each([&rres_it](View& view, iterator it)
     { emplace(rres_it, *it); });
     conn beccon = vec.before_erase([&reres](const typename View::value_type& v)
     { emplace(reres, v); });
-    conn beccon_it = vec.before_erase([&reres_it](View& view, typename View::iterator it)
+    conn beccon_it = vec.before_erase([&reres_it](View& view, iterator it)
     { emplace(reres_it, *it); });
+    //Template
+    conn feconn_t = vec.for_each(Fn_ref<E>{rres_t});
+    conn feconn_it_t = vec.for_each(Fn_it<E>{rres_it_t});
+    conn beccon_t = vec.before_erase(Fn_ref<E>{reres_t});
+    conn beccon_it_t = vec.before_erase(Fn_it<E>{reres_it_t});
+
     auto rvec = f(vec);
     BOOST_TEST(rres == for_each_expected);
     BOOST_TEST(rres_it == for_each_expected);
+    BOOST_TEST(rres_t == for_each_expected);
+    BOOST_TEST(rres_it_t == for_each_expected);
     if(!erased_expected.empty())
     {
         BOOST_TEST(reres == erased_expected);
         BOOST_TEST(reres_it == erased_expected);
+        BOOST_TEST(reres_t == erased_expected);
+        BOOST_TEST(reres_it_t == erased_expected);
     }
 }
 
