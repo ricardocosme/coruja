@@ -155,8 +155,8 @@ public:
 
     coruja_remove_if_view() = default;
 
-    coruja_remove_if_view(Rng&& rng, Pred pred)
-        : _rng(std::forward<Rng>(rng))
+    coruja_remove_if_view(Rng rng, Pred pred)
+        : _rng(std::move(rng))
         , _pred(std::move(pred))
     {}
 
