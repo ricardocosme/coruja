@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "coruja/object/view/detail/relational_operators.hpp"
 #include "coruja/object/view/object.hpp"
 #include "coruja/support/signal/any_connection.hpp"
 #include "coruja/support/signal.hpp"
