@@ -74,10 +74,12 @@ public:
     template<typename... PArgs>
     void operator()(PArgs&&... args)
     {
-        for(_slots->it = _slots->begin(); _slots->it != _slots->end();)
+        for(_slots->it = _slots->begin();
+            _slots->it != _slots->end();
+            ++_slots->it)
         {
-            auto it = (_slots->it)++;
-            if(!it->first && it->second) it->second(std::forward<PArgs>(args)...);
+            if(!_slots->it->first)
+                _slots->it->second(std::forward<PArgs>(args)...);
         }
     }
 
