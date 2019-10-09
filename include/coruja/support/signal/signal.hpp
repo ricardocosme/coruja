@@ -48,24 +48,13 @@ public:
     using connection_t = connection<slots_t>;
     using scoped_connection_t = scoped_connection<connection_t>;
     
-    signal()
-        : _slots(new slots_t)
-    {
-    }
+    signal() : _slots(new slots_t) {}
 
     signal(const signal&) = delete;
     signal& operator=(const signal&) = delete;
     
-    signal(signal&& rhs)
-        : _slots(std::move(rhs._slots))
-    {
-    }
-    
-    signal& operator=(signal&& rhs)
-    {
-        _slots = std::move(rhs._slots);
-        return *this;
-    }
+    signal(signal&&) = default;
+    signal& operator=(signal&&) = default;
     
     template<typename Slot>
     connection_t connect(Slot&& slot)
