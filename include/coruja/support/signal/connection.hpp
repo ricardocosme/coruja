@@ -68,10 +68,7 @@ public:
     }
     
     void disconnect()
-    {
-        auto pslots = _slots.lock();
-        if(pslots) pslots->it = pslots->erase(_it);
-    }
+    { if(auto slots = _slots.lock()) slots->it = slots->erase(_it); }
 
     bool blocked() const noexcept
     { return _it->blocked; }
