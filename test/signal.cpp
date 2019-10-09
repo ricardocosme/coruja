@@ -138,7 +138,6 @@ int main()
         o = 5;
         assert(called);
         any_conn.disconnect();
-        assert(!any_conn.blocked());
         called = false;
         o = 10;
         assert(!called);
