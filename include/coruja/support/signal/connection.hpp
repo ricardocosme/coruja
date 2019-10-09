@@ -74,13 +74,13 @@ public:
     }
 
     bool blocked() const noexcept
-    { return _it->first; }
+    { return _it->blocked; }
     
     void block() noexcept
-    { _it->first = true; }
+    { _it->blocked = true; }
     
     void unblock() noexcept
-    { _it->first = false; }
+    { _it->blocked = false; }
 };
 
 template<typename Slots>

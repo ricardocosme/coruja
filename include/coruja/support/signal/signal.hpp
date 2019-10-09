@@ -29,11 +29,15 @@ class signal<R(Args...)>
 {
 public:
     using args_t = boost::mpl::vector<Args...>;
-    using slot_t = typename std::function<R(Args...)>;
+    using cbk_t = typename std::function<R(Args...)>;
 private:
-    struct slots_t : std::list<std::pair<bool, slot_t>>
+    struct slot_t {
+        bool blocked;
+        cbk_t cbk;
+    };
+    struct slots_t : std::list<slot_t>
     {
-        using base = std::list<std::pair<bool, slot_t>>;
+        using base = std::list<slot_t>;
         using base::base;
 
         typename base::iterator it;
@@ -68,7 +72,8 @@ public:
     {
         return connection_t
             (_slots,
-             _slots->emplace(_slots->end(), false, std::forward<Slot>(slot)));
+             _slots->insert(_slots->end(),
+                            slot_t{false, std::forward<Slot>(slot)}));
     }
 
     template<typename... PArgs>
@@ -78,8 +83,8 @@ public:
             _slots->it != _slots->end();
             ++_slots->it)
         {
-            if(!_slots->it->first)
-                _slots->it->second(std::forward<PArgs>(args)...);
+            if(!_slots->it->blocked)
+                _slots->it->cbk(std::forward<PArgs>(args)...);
         }
     }
 
