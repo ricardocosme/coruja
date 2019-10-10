@@ -83,9 +83,9 @@ public:
         static void _move(void* self, void* p) noexcept
         { new (p) model_t(std::move(*static_cast<model_t*>(self)->_conn)); }
         static bool less_than(const void* self, const void* rhs) 
-        { return static_cast<const model_t*>(self)->_conn < static_cast<const model_t*>(rhs)->_conn; }
+        { return *(static_cast<const model_t*>(self)->_conn) < *(static_cast<const model_t*>(rhs)->_conn); }
         static bool equal_to(const void* self, const void* rhs) 
-        { return static_cast<const model_t*>(self)->_conn == static_cast<const model_t*>(rhs)->_conn; }
+        { return *(static_cast<const model_t*>(self)->_conn) == *(static_cast<const model_t*>(rhs)->_conn); }
         static const std::type_info& type(const void* self) noexcept
         { return typeid(model_t); }
         static constexpr connection_base vtable
