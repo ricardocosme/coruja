@@ -69,11 +69,15 @@ public:
     void operator()(PArgs&&... args)
     {
         for(_slots->it = _slots->begin();
-            _slots->it != _slots->end();
-            ++_slots->it)
+            _slots->it != _slots->end();)
         {
-            if(!_slots->it->blocked)
-                _slots->it->cbk(std::forward<PArgs>(args)...);
+            auto it = (_slots->it)++;
+            if(!it->blocked)
+                it->cbk(std::forward<PArgs>(args)...);
+            //TODO: Why not the following:
+            // if(!_slots->it->blocked)
+            //     _slots->it->cbk(std::forward<PArgs>(args)...);
+            // ++_slots->it;
         }
     }
 
