@@ -6,4 +6,4 @@
 
 #pragma once
 
-#define CORUJA_VERSION "0.1.0_beta5"
+#define CORUJA_VERSION "0.1.0_beta6"
