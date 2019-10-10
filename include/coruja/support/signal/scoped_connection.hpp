@@ -14,16 +14,9 @@ template<typename Connection>
 class scoped_connection;
     
 template<typename Connection>
-inline bool operator<(const scoped_connection<Connection>& lhs,
-                      const scoped_connection<Connection>& rhs);
-    
-template<typename Connection>
 class scoped_connection
 {
     Connection _conn;
-    
-    friend bool operator< <>(const scoped_connection&,
-                             const scoped_connection&);
     
 public:
     scoped_connection() = default;
@@ -69,7 +62,7 @@ public:
 template<typename Connection>
 inline bool operator==(const scoped_connection<Connection>& lhs,
                        const scoped_connection<Connection>& rhs)
-{ return lhs._conn == rhs._conn; }
+{ return lhs.get() == rhs.get(); }
     
 template<typename Connection>
 inline bool operator!=(const scoped_connection<Connection>& lhs,
@@ -79,22 +72,22 @@ inline bool operator!=(const scoped_connection<Connection>& lhs,
 template<typename Connection>
 inline bool operator<(const scoped_connection<Connection>& lhs,
                       const scoped_connection<Connection>& rhs)
-{ return lhs._conn < rhs._conn; }
+{ return lhs.get() < rhs.get(); }
     
 template<typename Connection>
 inline bool operator>(const scoped_connection<Connection>& lhs,
                       const scoped_connection<Connection>& rhs)
-{ return rhs._conn < lhs._conn; }
+{ return rhs.get() < lhs.get(); }
     
 template<typename Connection>
 inline bool operator<=(const scoped_connection<Connection>& lhs,
                        const scoped_connection<Connection>& rhs)
-{ return !(rhs._conn < lhs._conn); }
+{ return !(rhs.get() < lhs.get()); }
     
 template<typename Connection>
 inline bool operator>=(const scoped_connection<Connection>& lhs,
                        const scoped_connection<Connection>& rhs)
-{ return !(lhs._conn < rhs._conn); }
+{ return !(lhs.get() < rhs.get()); }
     
 }
 
