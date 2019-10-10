@@ -7,8 +7,10 @@
 #pragma once
 
 #include "coruja/support/detail/connections_visitors.hpp"
+#include "coruja/support/signal/connection.hpp"
 
 #include <boost/fusion/include/all.hpp>
+#include <boost/fusion/include/equal_to.hpp>
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/vector.hpp>
 
@@ -38,6 +40,20 @@ struct connections
 private:
     
     type _conns;
+
+    template<typename... Conns_>
+    friend bool operator==(const connections<Conns_...>&,
+                           const connections<Conns_...>&);
 };
+
+template<typename... Conns>
+inline bool operator==(const connections<Conns...>& lhs,
+                       const connections<Conns...>& rhs)
+{ return lhs._conns == rhs._conns; }
+    
+template<typename... Conns>
+inline bool operator!=(const connections<Conns...>& lhs,
+                       const connections<Conns...>& rhs)
+{ return !(lhs == rhs); }
 
 }
