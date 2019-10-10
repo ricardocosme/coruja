@@ -8,6 +8,7 @@
 #include <coruja/object/object_io.hpp>
 #include <coruja/object/view/transform.hpp>
 #include <coruja/object/view/lift.hpp>
+#include <coruja/support/signal/any_connection.hpp>
 
 #include <boost/core/lightweight_test.hpp>
 
@@ -115,8 +116,10 @@ int main()
         object_t o2{false};
         auto o3 = o1 && o2;
         bool called{false};
-        o3.after_change([&called](object_t::value_type s)
-                        { called = true; });
+        auto conn = o3.after_change
+            ([&called](object_t::value_type s)
+             { called = true; });
+        BOOST_TEST(conn == conn);
         o2 = true;
         BOOST_TEST(called);
         BOOST_TEST(o3 == true);
@@ -124,6 +127,13 @@ int main()
         o1 = false;
         BOOST_TEST(called);
         BOOST_TEST(o3 == false);
+        called = false;
+        conn.disconnect();
+        o1 = true;
+        BOOST_TEST(!called);
+        o2 = true;
+        BOOST_TEST(!called);
+        BOOST_TEST(o3 == true);
     }
  
     //coruja::object<bool> && lift_object
