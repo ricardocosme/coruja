@@ -9,6 +9,7 @@
 #include "coruja/detail/observer_class.hpp"
 #include "coruja/support/signal/any_connection.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -18,8 +19,30 @@ namespace coruja {
 template<typename Derived, typename Base = void>
 class observer_class : public detail::base_or_empty<Base>
 {    
+public:    
+    class connection : public any_connection
+    {
+        std::vector<scoped_any_connection>* _conns;
+    public:
+        connection() = default;
+        
+        connection(std::vector<scoped_any_connection>& conns, any_connection c)
+            : any_connection(std::move(c))
+            , _conns(&conns)
+        {}
+
+        //precondition: the connection must be established.
+        void disconnect()
+        {
+            _conns->erase(std::find_if
+                (_conns->begin(), _conns->end(),
+                 [&](scoped_any_connection& o)
+                 { return o.get() == static_cast<any_connection&>(*this); }));
+        }
+    };
+private:    
     std::unique_ptr<Derived*> _self;
-    std::vector<scoped_any_connection>_conns;
+    std::unique_ptr<std::vector<scoped_any_connection>>_conns;
     
     Derived& derived() noexcept
     { return static_cast<Derived&>(*this); }
@@ -78,11 +101,11 @@ class observer_class : public detail::base_or_empty<Base>
     }
 
     template<typename Action, typename To, typename Reaction>
-    any_connection observe_impl(To&& to, Reaction&& reaction)
+    connection observe_impl(To&& to, Reaction&& reaction)
     {
-        _conns.emplace_back
+        _conns->emplace_back
             (observe(to, std::forward<Reaction>(reaction), Action{}));
-        return _conns.back().get();
+        return {*_conns, _conns->back().get()};
     }
         
 public:
@@ -91,6 +114,7 @@ public:
     observer_class()
         : base()
         , _self(new Derived*{&derived()})
+        , _conns(new std::vector<scoped_any_connection>{})
     {}
     
     template<typename Arg, typename... Args,
@@ -101,11 +125,12 @@ public:
     explicit observer_class(Arg&& arg, Args&&... args)
         : base(std::forward<Arg>(arg), std::forward<Args>(args)...)
         , _self(new Derived*{&derived()})
+        , _conns(new std::vector<scoped_any_connection>{})
     {
     }
     
     template<typename To, typename Reaction>
-    any_connection observe(To&& to, Reaction&& reaction)
+    connection observe(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::after_change>
             (to, std::forward<Reaction>(reaction));
@@ -115,28 +140,28 @@ public:
     //be renamed to `observe` when `object::after_change` is replaced
     //by `object::for_each`.
     template<typename To, typename Reaction>
-    any_connection observe_obj_for_each(To&& to, Reaction&& reaction)
+    connection observe_obj_for_each(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::obj_for_each>
             (to, std::forward<Reaction>(reaction));
     }
     
     template<typename To, typename Reaction>
-    any_connection observe_for_each(To&& to, Reaction&& reaction)
+    connection observe_for_each(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::for_each>
             (to, std::forward<Reaction>(reaction));
     }
     
     template<typename To, typename Reaction>
-    any_connection observe_before_erase(To&& to, Reaction&& reaction)
+    connection observe_before_erase(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::before_erase>
             (to, std::forward<Reaction>(reaction));
     }
     
     template<typename To, typename Reaction>
-    any_connection observe_after_insert(To&& to, Reaction&& reaction)
+    connection observe_after_insert(To&& to, Reaction&& reaction)
     {
         return observe_impl<detail::tag::after_insert>
             (to, std::forward<Reaction>(reaction));
