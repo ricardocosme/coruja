@@ -11,6 +11,7 @@
 #include <coruja/object/view/transform.hpp>
 
 #include <boost/core/lightweight_test.hpp>
+#include <memory>
 #include <sstream>
 
 using namespace coruja;
@@ -240,5 +241,48 @@ int main()
         std::ostringstream os;
         os << any;
         BOOST_TEST(os.str() == any);
+    }
+
+    //any_object<T, DisconnectOnDestruction>::disconnect
+    {
+        object<bool> o;
+        view::any_object<bool, view::DisconnectOnDestruction> v{o};
+        bool called{false};
+        auto conn = v.for_each([&](bool){ called = true; });
+        BOOST_TEST(called);
+        called = false;
+        conn.disconnect();
+        o = true;
+        BOOST_TEST(!called);
+    }
+
+    //any_object<T, DisconnectOnDestruction> dtor
+    {
+        bool called{false};
+        object<bool> o;
+        {
+            view::any_object<bool, view::DisconnectOnDestruction> v{o};
+            v.for_each([&](bool){ called = true; });
+            BOOST_TEST(called);
+            called = false;
+        }
+        o = true;
+        BOOST_TEST(!called);
+    }
+    
+    //any_object<T, DisconnectOnDestruction>::disconnect when
+    //observable is destroyed.
+    {
+        std::unique_ptr<object<bool>> o{new object<bool>};
+        view::any_object<bool, view::DisconnectOnDestruction> v{*o};
+        bool called{false};
+        auto conn = v.for_each([&](bool){ called = true; });
+        BOOST_TEST(called);
+        called = false;
+        o.reset();
+        
+        //this should be a valid call and it should do nothing in this
+        //context.
+        conn.disconnect(); 
     }
 }

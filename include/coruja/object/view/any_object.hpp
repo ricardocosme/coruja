@@ -8,9 +8,10 @@
 
 #include "coruja/object/view/detail/relational_operators.hpp"
 #include "coruja/object/view/object.hpp"
-#include "coruja/support/signal/any_connection.hpp"
 #include "coruja/support/signal.hpp"
+#include "coruja/support/signal/any_connection.hpp"
 #include "coruja/support/signal/any_signal_id_t.hpp"
+#include "coruja/support/signal/scoped_connection.hpp"
 #include "coruja/support/type_traits.hpp"
 
 #include <functional>
@@ -19,7 +20,9 @@
 
 namespace coruja { namespace view {
 
-template<typename T>
+struct DisconnectOnDestruction {};
+
+template<typename T, typename DisconnectOnDestruction_ = void>
 class any_object : view_base
 {
     struct any_object_iface
@@ -34,8 +37,13 @@ class any_object : view_base
         virtual any_signal_id_t for_each_id() const noexcept = 0;
     };
 
+    template<typename ObservableObject,
+             typename DisconnectOnDestruction__>
+    struct model_t;
+    
     template<typename ObservableObject>
-    struct model_t : any_object_iface
+    struct model_t<ObservableObject, void>
+        : any_object_iface
     {
         model_t() = default;
         
@@ -68,6 +76,82 @@ class any_object : view_base
         ObservableObject _obj;
     };
     
+    template<typename ObservableObject>
+    struct model_t<ObservableObject, DisconnectOnDestruction>
+        : any_object_iface
+    {
+        using model_conn_t = typename remove_reference_t<ObservableObject>
+            ::after_change_connection_t;
+        using conns_t = std::vector<scoped_connection<model_conn_t>>;
+        
+        class connection : public any_connection
+        {
+            std::weak_ptr<conns_t> _conns;
+            
+            connection(std::shared_ptr<conns_t> conns, any_connection c)
+                : any_connection(std::move(c))
+                , _conns(conns)
+            {}
+
+            template<typename, typename>
+            friend struct any_object::model_t;
+        public:
+            connection() = default;
+        
+            //precondition: the connection must be established.
+            void disconnect() {
+                if(auto conns = _conns.lock())
+                    conns->erase(
+                        std::find_if
+                        (conns->begin(), conns->end(),
+                         [&](typename conns_t::value_type& o)
+                         { return o.get() == static_cast<any_connection&>(*this); }));
+            }
+        };
+        
+        model_t()
+            : any_object_iface()
+            , _conns(new conns_t{})
+        {}
+        
+        template<typename U>
+        model_t(U&& obj)
+            : any_object_iface()
+            , _obj(std::forward<U>(obj))
+            , _conns(new conns_t{})
+        {}
+        
+        any_object_iface* clone() const override
+        { return new model_t(_obj); }
+        
+        T get() const noexcept override
+        { return _obj.get(); }
+        
+        T observed() const noexcept override
+        { return get(); }
+        
+        any_connection after_change(std::function<void(const T&)> f) override
+        {
+            _conns->emplace_back(_obj.after_change(std::move(f)));
+            return connection{_conns, _conns->back().get()};
+        }
+        
+        any_connection for_each(std::function<void(const T&)> f) override
+        {
+            _conns->emplace_back(_obj.for_each(std::move(f)));
+            return connection{_conns, _conns->back().get()};
+        }
+        
+        any_signal_id_t after_change_id() const noexcept override
+        { return _obj.after_change_id(); }
+        
+        any_signal_id_t for_each_id() const noexcept override
+        { return _obj.for_each_id(); }
+        
+        ObservableObject _obj;
+        std::shared_ptr<conns_t>  _conns;
+    };
+
     std::unique_ptr<any_object_iface> _model;
     
 public:
@@ -86,7 +170,7 @@ public:
                      any_object>::value
                  >>
     any_object(ObservableObject&& o)
-        : _model(new model_t<ObservableObject>
+        : _model(new model_t<ObservableObject, DisconnectOnDestruction_>
                  (std::forward<ObservableObject>(o)))
     {}
 
