@@ -74,18 +74,18 @@ int main()
         BOOST_TEST(lst.back() == "ghi");
     }
     
-    //splice observable and observed
+    //splice observable and observed - other as rvalue - limited range
     {
         slist lst({"abc", "def", "ghi"});
         slist::observed_t other({"jkl", "mno"});
         std::vector<slist::value_type> after;
         lst.for_each([&](slist::value_type o)
                     { after.push_back(o); });
-        lst.splice(lst.end(), other);
+        lst.splice(lst.end(), other, other.begin(), std::next(other.begin()));
         BOOST_TEST((after == std::vector<std::string>
-            {"abc", "def", "ghi", "jkl", "mno"}));
-        BOOST_TEST(lst.size() == 5);
-        BOOST_TEST(lst.back() == "mno");
+            {"abc", "def", "ghi", "jkl"}));
+        BOOST_TEST(lst.size() == 4);
+        BOOST_TEST(lst.back() == "jkl");
     }
 
     //splice observable and observed, other as a rvalue
@@ -185,12 +185,8 @@ int main()
 
     //splice observables - single element 
     {
-        React2Splice react{{"abc", "def", "ghi"}, {}};
+        React2Splice react{{"abc", "def", "ghi"}, {"123"}};
 
-        react.dst_list.splice(std::prev(react.dst_list.end()), react.src_list, 
-                              react.src_list.end());
-
-        react.src_list.push_back("123");
         react.dst_list.splice(std::prev(react.dst_list.end()), react.src_list, 
                               react.src_list.begin());
 
@@ -214,5 +210,16 @@ int main()
         BOOST_TEST(react.dst_list.back() == "abc");
         BOOST_TEST((react.src_list_removed == React2Splice::list_type{}));
         BOOST_TEST(react.src_list_removed.size() == 0);
+    }
+
+    //splice observables - other as rvalue
+    {
+        React2Splice react{{"abc"}, {}};
+
+        react.dst_list.splice(react.dst_list.end(), slist{"123"});
+
+        BOOST_TEST((react.dst_list_inserted == React2Splice::list_type{"abc", "123"}));
+        BOOST_TEST(react.dst_list.size() == 2);
+        BOOST_TEST(react.dst_list.back() == "123");
     }
 }
