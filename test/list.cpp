@@ -60,7 +60,7 @@ int main()
         BOOST_TEST(lst.front() == "def");
     }
 
-    //splice - empty other
+    //splice observable and observed - empty other
     {
         slist lst({"abc", "def", "ghi"});
         slist::observed_t other;
@@ -74,7 +74,7 @@ int main()
         BOOST_TEST(lst.back() == "ghi");
     }
     
-    //splice
+    //splice observable and observed
     {
         slist lst({"abc", "def", "ghi"});
         slist::observed_t other({"jkl", "mno"});
@@ -88,7 +88,7 @@ int main()
         BOOST_TEST(lst.back() == "mno");
     }
 
-    //splice, other as a rvalue
+    //splice observable and observed, other as a rvalue
     {
         slist lst({"abc", "def", "ghi"});
         std::vector<slist::value_type> after;
@@ -121,5 +121,98 @@ int main()
         coruja::erase(vec, "xxx");
         BOOST_TEST(removed == std::vector<std::string>({"xxx", "xxx", "xxx"}));
         c.disconnect();
+    }
+
+    struct React2Splice
+    {
+        React2Splice(std::initializer_list<std::string> dst_list_, 
+                     std::initializer_list<std::string> src_list_)
+            :dst_list(dst_list_)
+            ,src_list(src_list_)
+        {
+            dst_list.for_each([&](slist::value_type o)
+                        { dst_list_inserted.push_back(o); });
+            src_list.before_erase([&](slist::value_type o)
+                        { src_list_removed.push_back(o); });
+        }
+
+        using list_type = std::vector<slist::value_type>;
+        list_type dst_list_inserted, src_list_removed;
+
+        slist dst_list, src_list;
+    };
+
+    //splice observables - dst_list is empty
+    {
+        React2Splice react{{}, {"123", "456", "789"}};
+
+        react.dst_list.splice(react.dst_list.end(), react.src_list);
+
+        BOOST_TEST((react.dst_list_inserted == React2Splice::list_type{"123", "456", "789"}));
+        BOOST_TEST(react.dst_list.size() == 3);
+        BOOST_TEST(react.dst_list.back() == "789");
+        BOOST_TEST((react.src_list_removed == React2Splice::list_type{"123", "456", "789"}));
+        BOOST_TEST(react.src_list_removed.size() == 3);
+    }
+
+    //splice observables - src_list is empty
+    {
+        React2Splice react{{"abc", "def", "ghi"}, {}};
+
+        react.dst_list.splice(react.dst_list.end(), react.src_list);
+
+        BOOST_TEST((react.dst_list_inserted == React2Splice::list_type{"abc", "def", "ghi"}));
+        BOOST_TEST(react.dst_list.size() == 3);
+        BOOST_TEST(react.dst_list.back() == "ghi");
+        BOOST_TEST((react.src_list_removed == React2Splice::list_type{}));
+        BOOST_TEST(react.src_list_removed.size() == 0);
+    }
+
+    //splice observables - limited range 
+    {
+        React2Splice react{{"abc", "def", "ghi"}, {"123", "456", "789"}};
+
+        react.dst_list.splice(std::prev(react.dst_list.end()), react.src_list, 
+                        std::next(react.src_list.begin()), std::prev(react.src_list.end()));
+
+        BOOST_TEST((react.dst_list == slist{"abc", "def", "456", "ghi"}));
+        BOOST_TEST(react.dst_list.size() == 4);
+        BOOST_TEST(react.dst_list.back() == "ghi");
+        BOOST_TEST((react.dst_list_inserted == React2Splice::list_type{"abc", "def", "ghi", "456"}));
+        BOOST_TEST((react.src_list_removed == React2Splice::list_type{"456"}));
+        BOOST_TEST(react.src_list_removed.size() == 1);
+    }
+
+    //splice observables - single element 
+    {
+        React2Splice react{{"abc", "def", "ghi"}, {}};
+
+        react.dst_list.splice(std::prev(react.dst_list.end()), react.src_list, 
+                              react.src_list.end());
+
+        react.src_list.push_back("123");
+        react.dst_list.splice(std::prev(react.dst_list.end()), react.src_list, 
+                              react.src_list.begin());
+
+        BOOST_TEST((react.dst_list == slist{"abc", "def", "123", "ghi"}));
+        BOOST_TEST((react.dst_list_inserted == React2Splice::list_type{"abc", "def", "ghi", "123"}));
+        BOOST_TEST(react.dst_list_inserted.size() == 4);
+        BOOST_TEST(react.dst_list_inserted.back() == "123");
+        BOOST_TEST((react.src_list_removed == React2Splice::list_type{"123"}));
+        BOOST_TEST(react.src_list_removed.size() == 1);
+    }
+
+    //splice observables - duplicated iterator 
+    {
+        React2Splice react{{"abc"}, {"123"}};
+
+        react.dst_list.splice(react.dst_list.end(), react.src_list, 
+                              react.src_list.begin(), react.src_list.begin());
+
+        BOOST_TEST((react.dst_list_inserted == React2Splice::list_type{"abc"}));
+        BOOST_TEST(react.dst_list.size() == 1);
+        BOOST_TEST(react.dst_list.back() == "abc");
+        BOOST_TEST((react.src_list_removed == React2Splice::list_type{}));
+        BOOST_TEST(react.src_list_removed.size() == 0);
     }
 }
