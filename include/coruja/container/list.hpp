@@ -157,7 +157,7 @@ public:
 
         auto has_n = std::distance(_container.cbegin(), pos);
         auto insert_n = std::distance(first, last);
-        _container.splice(pos, std::forward<Observed>(other), first, last);
+        _container.splice(const_it_cast(_container, pos), std::forward<Observed>(other), first, last);
         auto begin = std::next(_container.begin(), has_n);
         emit_after_insert(begin, std::next(begin, insert_n));
     }
