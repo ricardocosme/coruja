@@ -157,6 +157,30 @@ public:
         auto begin = std::next(_container.begin(), has_n);
         emit_after_insert(begin, std::next(begin, insert_n));
     }
+
+    void splice(const_iterator pos, list& other, iterator first, iterator last)
+    {
+        if(first == last)
+            return;
+
+        auto has_n = std::distance(_container.cbegin(), pos);
+        auto insert_n = std::distance(first, last);
+        other.emit_before_erase(first, last);
+        _container.splice(pos, other._container, first, last);
+        auto begin = std::next(_container.begin(), has_n);
+        emit_after_insert(begin, std::next(begin, insert_n));
+    }
+
+    void splice(const_iterator pos, list& other)
+    {
+        splice(pos, other, other.begin(), other.end());
+    }
+
+    void splice(const_iterator pos, list& other, iterator it)
+    {
+        if(it != other.end())
+            splice(pos, other, it, std::next(it));
+    }
 };
     
 template<typename T,
