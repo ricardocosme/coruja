@@ -150,10 +150,11 @@ public:
     }        
 
     template<typename Observed>
-    void splice(const_iterator pos, Observed&& other) {
+    void splice(const_iterator pos, Observed&& other)
+    {
         auto has_n = std::distance(_container.cbegin(), pos);
         auto insert_n = other.size();
-        _container.splice(const_it_cast(_container, pos), other);
+        _container.splice(pos, std::forward<Observed>(other));
         auto begin = std::next(_container.begin(), has_n);
         emit_after_insert(begin, std::next(begin, insert_n));
     }
