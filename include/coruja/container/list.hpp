@@ -150,37 +150,53 @@ public:
     }        
 
     template<typename Observed>
-    void splice(const_iterator pos, Observed&& other)
-    {
-        auto has_n = std::distance(_container.cbegin(), pos);
-        auto insert_n = other.size();
-        _container.splice(pos, std::forward<Observed>(other));
-        auto begin = std::next(_container.begin(), has_n);
-        emit_after_insert(begin, std::next(begin, insert_n));
-    }
-
-    void splice(const_iterator pos, list& other, iterator first, iterator last)
+    void splice(const_iterator pos, Observed&& other, iterator first, iterator last)
     {
         if(first == last)
             return;
 
         auto has_n = std::distance(_container.cbegin(), pos);
         auto insert_n = std::distance(first, last);
-        other.emit_before_erase(first, last);
-        _container.splice(pos, other._container, first, last);
+        _container.splice(pos, std::forward<Observed>(other), first, last);
         auto begin = std::next(_container.begin(), has_n);
         emit_after_insert(begin, std::next(begin, insert_n));
     }
 
+    template<typename Observed>
+    void splice(const_iterator pos, Observed&& other)
+    {
+        splice(pos, std::forward<Observed>(other), other.begin(), other.end());
+    }
+
+    void splice(const_iterator pos, list& other, iterator first, iterator last)
+    {
+        splice(pos, std::move(other), first, last);
+    }
+
+    void splice(const_iterator pos, list&& other, iterator first, iterator last)
+    {
+        other.emit_before_erase(first, last);
+        splice(pos, other._container, first, last);
+    }
+
     void splice(const_iterator pos, list& other)
+    {
+        splice(pos, std::move(other));
+    }
+
+    void splice(const_iterator pos, list&& other)
     {
         splice(pos, other, other.begin(), other.end());
     }
 
     void splice(const_iterator pos, list& other, iterator it)
     {
-        if(it != other.end())
-            splice(pos, other, it, std::next(it));
+        splice(pos, std::move(other), it);
+    }
+
+    void splice(const_iterator pos, list&& other, iterator it)
+    {
+        splice(pos, other, it, std::next(it));
     }
 };
     
