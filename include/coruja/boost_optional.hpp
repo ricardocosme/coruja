@@ -121,6 +121,13 @@ public:
     { return !_observed; }
     
     BOOST_EXPLICIT_OPERATOR_BOOL_NOEXCEPT()
+
+    template <typename... Args>
+    void emplace(Args&&... args)
+    {
+        _observed.emplace(std::forward<Args>(args)...);
+        base::_after_change(base::as_derived());
+    }
     
     const T& get() const
     { return _observed.get(); }
