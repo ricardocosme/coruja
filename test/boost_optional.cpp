@@ -133,6 +133,32 @@ int main()
         BOOST_TEST(v2.get() == "abc");
     }
 
+    //optional.emplace(...)
+    {
+        struct NonMovable
+        {
+            NonMovable(NonMovable&&) = delete;
+            NonMovable& operator=(NonMovable&&) = delete;
+
+            NonMovable() = default;
+            NonMovable(std::string str) : str{std::move(str)}
+            {}
+
+            std::string str;
+        };
+
+        coruja::optional<NonMovable> v;
+        std::string str;
+
+        v.after_change
+            ([&](coruja::optional<NonMovable>& v)
+             { if(v) str = v.get().str; });
+
+        v.emplace("hello");
+
+        BOOST_TEST(str == "hello");
+    }
+
     //get() const
     {
         const optional_t o("abc");        
