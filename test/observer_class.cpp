@@ -8,6 +8,7 @@
 
 #include <coruja/container/vector.hpp>
 #include <coruja/object/object.hpp>
+#include <coruja/object/view/any_object.hpp>
 #include <coruja/boost_optional.hpp>
 #include <coruja/boost_variant.hpp>
 #include <coruja/observer_class.hpp>
@@ -113,6 +114,18 @@ void test_reactions(Class& o, bool& called)
     called = false;
 }
 
+struct observe_any_view : observer_class<observe_any_view> {
+    observe_any_view(view::any_object<int>& o) {
+        observe(o, []{});
+        observe(o, [](observe_any_view&){});
+        observe(o, [](observe_any_view&, int){});
+        
+        observe_obj_for_each(o, []{});
+        observe_obj_for_each(o, [](observe_any_view&){});
+        observe_obj_for_each(o, [](observe_any_view&, int){});
+    }
+};
+
 int main() {
 
     static_assert(std::is_default_constructible<my_class_eb>::value,"");
@@ -139,5 +152,11 @@ int main() {
         my_class_eb o{called};
         o = std::move(src);
         test_reactions(o, called);
+    }
+
+    {
+        object<int> o;
+        view::any_object<int> v(o);
+        observe_any_view c(v);
     }
 }

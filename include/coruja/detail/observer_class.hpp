@@ -34,10 +34,18 @@ using base_or_empty = typename std::conditional<
 template<typename T>
 using self_element_type = typename std::remove_pointer<T>::type;
         
+template<typename Self, typename Reaction, typename To, typename Enable = void>
+struct wrap_after_change_cbk_impl;
+
 template<typename Self, typename Reaction, typename To>
-struct wrap_after_change_cbk : private Reaction
+struct wrap_after_change_cbk_impl<
+    Self,
+    Reaction,
+    To,
+    enable_if_t<!view::is_view<To>::value>
+    > : private Reaction
 {
-    wrap_after_change_cbk(Self& self, Reaction reaction)
+    wrap_after_change_cbk_impl(Self& self, Reaction reaction)
         : Reaction(std::move(reaction))
         , _self(self)
     {}
@@ -85,10 +93,53 @@ struct wrap_after_change_cbk : private Reaction
 };
 
 template<typename Self, typename Reaction, typename To>
-struct wrap_after_change_cbk<Self, Reaction, view::object<To>> :
-        wrap_after_change_cbk<Self, Reaction, To>
+struct wrap_after_change_cbk_impl<
+    Self,
+    Reaction,
+    To,
+    enable_if_t<view::is_view<To>::value>
+    > : private Reaction
 {
-    using base = wrap_after_change_cbk<Self, Reaction, To>;
+    wrap_after_change_cbk_impl(Self& self, Reaction reaction)
+        : Reaction(std::move(reaction))
+        , _self(self)
+    {}
+
+    template<typename To_>
+    enable_if_is_invocable_t<
+        void, Reaction, self_element_type<Self>&, const To_&>
+    invoke_reaction(const To_& o) const
+    { Reaction::operator()(*_self, o); }
+    
+    template<typename To_>
+    typename std::enable_if<
+        !boost::hof::is_invocable<Reaction, self_element_type<Self>&,
+                                   const To_&>::value
+        &&
+        boost::hof::is_invocable<Reaction, self_element_type<Self>&>::value,
+        void>::type
+    invoke_reaction(const To_& o) const
+    { Reaction::operator()(*_self); }
+    
+    template<typename To_>
+    typename std::enable_if<
+        !boost::hof::is_invocable<Reaction, self_element_type<Self>&,
+                                   const To_&>::value
+        &&
+        !boost::hof::is_invocable<Reaction, self_element_type<Self>&>::value,
+        void>::type
+    invoke_reaction(const To_& o) const
+    { Reaction::operator()(); }
+        
+    void operator()(const typename To::observed_t& o) const
+    { invoke_reaction(o); }
+    
+    Self& _self;
+};
+
+template<typename Self, typename Reaction, typename To>
+struct wrap_after_change_cbk : wrap_after_change_cbk_impl<Self, Reaction, To> {
+    using base = wrap_after_change_cbk_impl<Self, Reaction, To>;
     using base::base;
 };
 
