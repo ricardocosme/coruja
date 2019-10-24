@@ -236,4 +236,13 @@ int main()
         os << o2;
         BOOST_TEST(os.str() == o2);
     }
+
+    //transform_object::observed() must return a reference when the
+    //return of the transform function is a reference.
+    {
+        coruja::object<int> o1{5};
+        int c{10};
+        auto o2 = view::transform(o1, [&](int) -> int& { return c; });
+        BOOST_TEST(&o2.get() == &c);
+    }
 }

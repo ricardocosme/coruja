@@ -65,10 +65,10 @@ public:
         return after_change(std::forward<F>(f));
     }
     
-    observed_t get() const noexcept
+    result_of_t<Transform(Objects...)> get() const noexcept
     { return boost::fusion::invoke(_transform, _objects); }
 
-    observed_t observed() const noexcept
+    result_of_t<Transform(Objects...)> observed() const noexcept
     { return get(); }
     
     signal_id_t after_change_id() const noexcept

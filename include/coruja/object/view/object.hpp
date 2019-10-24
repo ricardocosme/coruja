@@ -32,10 +32,12 @@ public:
     
     object(ObservableObject& o) : _obj(&o) {}
 
-    observed_t get() const noexcept
+    decltype(std::declval<ObservableObject&>().get())
+    get() const noexcept
     { return _obj->observed(); }
 
-    observed_t observed() const noexcept
+    decltype(std::declval<ObservableObject&>().observed())
+    observed() const noexcept
     { return get(); }
     
     template<typename F>

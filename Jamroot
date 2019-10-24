@@ -51,6 +51,7 @@ run test/lift_object.cpp ;
 run test/list.cpp ;
 run test/map.cpp ;
 run test/object.cpp ;
+run test/object_view.cpp ;
 run test/observer_class.cpp ;
 run test/set.cpp ;
 run test/signal.cpp ;
