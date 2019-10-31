@@ -139,7 +139,7 @@ public:
     { return _observed.get_value_or(v); }
     
     T& get_value_or(T& v)
-    { return _observed.get_valure_or(v); }
+    { return _observed.get_value_or(v); }
     
     const observed_t& observed() const noexcept
     { return _observed; }
