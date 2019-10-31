@@ -180,7 +180,7 @@ int main()
     //get_value_or const
     {
         optional_t o; 
-        const optional_t& o_const{o};
+        const optional_t& o_const = o;
         optional_t::observed_t::value_type v("default");
         BOOST_TEST(o_const.get_value_or(v) == v);
 
