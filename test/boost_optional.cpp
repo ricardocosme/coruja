@@ -23,7 +23,7 @@ int main()
         static_assert(std::is_nothrow_default_constructible<optional_t>::value, "");
     }
 
-    //optiona(observed_t)
+    //optional(observed_t)
     {
         optional_t v(boost::optional<std::string>("abc"));
     }
@@ -164,5 +164,28 @@ int main()
         const optional_t o("abc");        
         BOOST_TEST(o);
         BOOST_TEST(o.get() == "abc");
+    }
+
+    //get_value_or
+    {
+        optional_t o; 
+        optional_t::observed_t::value_type v("default");
+        BOOST_TEST(o.get_value_or(v) == v);
+
+        o = "abc"; 
+        BOOST_TEST(o.get_value_or(v) == o.get());
+        
+    }
+
+    //get_value_or const
+    {
+        optional_t o; 
+        const optional_t& o_const{o};
+        optional_t::observed_t::value_type v("default");
+        BOOST_TEST(o_const.get_value_or(v) == v);
+
+        o = "abc"; 
+        BOOST_TEST(o_const.get_value_or(v) == o.get());
+        
     }
 }
